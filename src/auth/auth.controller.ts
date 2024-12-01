@@ -9,8 +9,9 @@ import {
 } from '@nestjs/common'
 import { AuthService } from './auth.service'
 import { LocalAuthGuard } from './local-auth.guard'
-import { SignUpDTO } from './auth.dto'
+import { LoginDTO, SignUpDTO } from './auth.dto'
 import { PublicUser } from 'src/schemas/user.schema'
+import { ApiBody } from '@nestjs/swagger'
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +20,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   @UseGuards(LocalAuthGuard)
+  @ApiBody({ type: LoginDTO })
   login(@Request() req: Request & { user: PublicUser }) {
     return this.authService.login(req.user)
   }
