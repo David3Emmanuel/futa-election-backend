@@ -1,4 +1,4 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose'
 import { Document, HydratedDocument, Types } from 'mongoose'
 import { Voter } from './voter.schema'
 import { Candidate } from './candidate.schema'
@@ -15,12 +15,24 @@ export class Election {
   @ApiProperty()
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })
   candidates: Candidate[]
-  @ApiProperty() @Prop([Vote]) votes: Vote[]
-  @ApiProperty() @Prop() active: boolean
+  @ApiProperty() @Prop([Vote]) votes?: Vote[]
+  @ApiProperty() @Prop() startDate: Date
+  @ApiProperty() @Prop() endDate: Date
+  @ApiProperty()
+  @Virtual({
+    get: function (this: Election) {
+      return this.startDate <= new Date() && this.endDate >= new Date()
+    },
+  })
+  active: boolean
 }
 
 export class ElectionWithId extends Election {
   @ApiProperty() _id: Types.ObjectId
+}
+
+export class ElectionWithoutVotes extends ElectionWithId {
+  @ApiProperty() votes: undefined
 }
 
 export function extractElection(
