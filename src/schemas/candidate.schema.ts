@@ -2,15 +2,15 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 import { Document, HydratedDocument, Types } from 'mongoose'
 
-export type CandidateWithId = Candidate & {
-  _id: Types.ObjectId
-}
-
 @Schema()
 export class Candidate {
   @ApiProperty() @Prop({ required: true }) name: string
   @ApiProperty() @Prop({ required: true }) currentPosition: string
   @ApiPropertyOptional() @Prop() imageUrl: string
+}
+
+export class CandidateWithId extends Candidate {
+  _id: Types.ObjectId
 }
 
 export function extractCandidate(
