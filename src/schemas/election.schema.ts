@@ -31,10 +31,6 @@ export class ElectionWithId extends Election {
   @ApiProperty() _id: Types.ObjectId
 }
 
-export class ElectionWithoutVotes extends ElectionWithId {
-  @ApiProperty() votes: undefined
-}
-
 export function extractElection(
   electionDocument: Document<unknown, object, Election>,
 ) {
