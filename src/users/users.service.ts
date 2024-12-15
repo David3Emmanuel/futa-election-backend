@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { ForbiddenException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { SignUpDTO } from 'src/auth/auth.dto'
@@ -25,7 +25,14 @@ export class UsersService {
     return user && asPublicUser(user)
   }
 
+  async anyUserExists() {
+    return (await this.model.countDocuments().exec()) > 0
+  }
+
   async createUser(userDetails: SignUpDTO) {
+    if (await this.anyUserExists())
+      throw new ForbiddenException('Admin already exists')
+
     const salt = await bcrypt.genSalt()
     const passwordHash = await bcrypt.hash(userDetails.password, salt)
     this.model.create({
