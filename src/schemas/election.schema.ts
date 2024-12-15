@@ -3,7 +3,7 @@ import { Document, HydratedDocument, Types } from 'mongoose'
 import { Voter } from './voter.schema'
 import { Candidate } from './candidate.schema'
 import { Vote } from './vote.schema'
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 @Schema()
 export class Election {
@@ -15,7 +15,7 @@ export class Election {
   @ApiProperty()
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })
   candidates: Candidate[]
-  @ApiProperty() @Prop([Vote]) votes?: Vote[]
+  @ApiPropertyOptional() @Prop([Vote]) votes?: Vote[]
   @ApiProperty() @Prop() startDate: Date
   @ApiProperty() @Prop() endDate: Date
   @ApiProperty()
