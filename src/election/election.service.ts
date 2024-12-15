@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -8,6 +9,7 @@ import { Model } from 'mongoose'
 import { Election, extractElection } from 'src/schemas/election.schema'
 import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
+import { CreateElectionDTO } from './election.dto'
 
 @Injectable()
 export class ElectionService {
@@ -32,7 +34,27 @@ export class ElectionService {
     return hideVotes(extractElection(election))
   }
 
-  async createElection(): Promise<void> {
+  async createElection({ start, end }: CreateElectionDTO): Promise<void> {
+    const currentYear = new Date().getFullYear()
+    if (start) {
+      // Ensure the start date is between now and end of the year
+      if (start.getFullYear() !== currentYear || start < new Date())
+        throw new BadRequestException('Invalid start date')
+    } else {
+      // Default to tomorrow
+      start = new Date(new Date().setHours(0, 0, 0, 0))
+      start.setDate(start.getDate() + 1)
+    }
+
+    if (end) {
+      // Ensure the end date is between start and end of the year
+      if (end < start) throw new BadRequestException('Invalid end date')
+    } else {
+      // Default to 14 days from start
+      end = new Date(start)
+      end.setDate(end.getDate() + 14)
+    }
+
     try {
       await this.getActiveElection()
       throw new ConflictException('There is already an active election')
@@ -40,7 +62,6 @@ export class ElectionService {
       if (!(e instanceof NotFoundException)) throw e
     }
 
-    const currentYear = new Date().getFullYear()
     try {
       await this.getElectionByYear(currentYear)
       throw new ConflictException(

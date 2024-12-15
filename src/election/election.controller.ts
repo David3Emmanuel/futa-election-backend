@@ -1,4 +1,12 @@
-import { Controller, Get, Param, Post, Patch, UseGuards } from '@nestjs/common'
+import {
+  Controller,
+  Get,
+  Param,
+  Post,
+  Patch,
+  UseGuards,
+  Body,
+} from '@nestjs/common'
 import { ElectionService } from './election.service'
 import { ElectionWithoutVotes } from './hideVotes'
 import {
@@ -8,8 +16,10 @@ import {
   ApiBearerAuth,
   ApiUnauthorizedResponse,
   ApiConflictResponse,
+  ApiBadRequestResponse,
 } from '@nestjs/swagger'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
+import { CreateElectionDTO } from './election.dto'
 
 @Controller('election')
 export class ElectionController {
@@ -64,8 +74,11 @@ export class ElectionController {
     description:
       'There is already an active election or an election for the current year',
   })
-  createElection() {
-    return this.electionService.createElection()
+  @ApiBadRequestResponse({
+    description: 'Invalid start or end date',
+  })
+  createElection(@Body() createElectionDTO: CreateElectionDTO) {
+    return this.electionService.createElection(createElectionDTO)
   }
 
   @ApiBearerAuth()
