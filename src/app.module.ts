@@ -3,7 +3,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { UsersModule } from './users/users.module'
 import { AuthModule } from './auth/auth.module'
 import { MongooseModule } from '@nestjs/mongoose'
-import { ElectionModule } from './election/election.module';
+import { ElectionModule } from './election/election.module'
+import { CandidateModule } from './candidate/candidate.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ElectionModule } from './election/election.module';
       }),
     }),
     ElectionModule,
+    CandidateModule,
   ],
 })
 export class AppModule {}
