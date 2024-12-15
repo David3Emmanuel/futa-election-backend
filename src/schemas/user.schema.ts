@@ -1,4 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
+import { ApiProperty } from '@nestjs/swagger'
 import { Document, HydratedDocument, Types } from 'mongoose'
 
 export type PublicUser = Omit<User, 'passwordHash'> & {
@@ -7,9 +8,11 @@ export type PublicUser = Omit<User, 'passwordHash'> & {
 
 @Schema()
 export class User {
-  @Prop({ required: true, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }) email: string
-  @Prop({ required: true }) username: string
-  @Prop({ required: true }) passwordHash: string
+  @ApiProperty()
+  @Prop({ required: true, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
+  email: string
+  @ApiProperty() @Prop({ required: true }) username: string
+  @ApiProperty() @Prop({ required: true }) passwordHash: string
 }
 
 export function extractUser(userDocument: Document<unknown, object, User>) {
