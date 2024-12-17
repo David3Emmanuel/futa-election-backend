@@ -37,9 +37,16 @@ export class CandidateService {
   }
 
   async createCandidate(candidate: Candidate): Promise<void> {
-    const existing = await this.getCandidateByName(candidate.name)
-    if (existing) throw new ConflictException('Candidate already exists')
-    await this.model.create(candidate)
+    try {
+      await this.getCandidateByName(candidate.name)
+      throw new ConflictException('Candidate already exists')
+    } catch (e) {
+      if (e instanceof NotFoundException) {
+        console.log('  Creating new candidate:', candidate.name)
+        await new this.model(candidate).save()
+        console.log('  Created candidate', new this.model(candidate)._id)
+      } else throw e
+    }
   }
 
   async removeCandidate(id: string): Promise<void> {
@@ -63,19 +70,35 @@ export class CandidateService {
   ): Promise<BulkAddResponseDTO> {
     let created = 0,
       updated = 0
-    candidates.forEach(async (candidate) => {
-      try {
-        const existing = await this.getCandidateByName(candidate.name)
-        await this.updateCandidate(existing._id.toString(), candidate)
-        updated += 1
-      } catch (e) {
-        if (e instanceof NotFoundException) {
-          await this.createCandidate(candidate)
-          created += 1
-        } else throw e
-      }
-    })
+    const ids: string[] = []
 
-    return { created, updated }
+    await Promise.all(
+      candidates.map(async (candidate) => {
+        try {
+          const existing = await this.getCandidateByName(candidate.name)
+          console.log(
+            'Found existing candidate: ',
+            candidate.name,
+            existing._id.toString(),
+          )
+          await this.updateCandidate(existing._id.toString(), candidate)
+          updated += 1
+          ids.push(existing._id.toString())
+        } catch (e) {
+          if (e instanceof NotFoundException) {
+            console.log('Adding new candidate: ', candidate.name)
+            await this.createCandidate(candidate)
+            created += 1
+            const new_candidate = await this.getCandidateByName(candidate.name)
+            console.log('New candidate: ', new_candidate)
+            ids.push(new_candidate._id.toString())
+          } else throw e
+        }
+
+        console.log({ created, updated, ids })
+      }),
+    )
+
+    return { created, updated, ids }
   }
 }

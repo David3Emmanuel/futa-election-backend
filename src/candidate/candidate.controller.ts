@@ -16,6 +16,7 @@ import {
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
+  ApiOperation,
 } from '@nestjs/swagger'
 import { Candidate, CandidateWithId } from 'src/schemas/candidate.schema'
 import { UpdateCandidateDTO } from './candidate.dto'
@@ -99,6 +100,11 @@ export class CandidateController {
   @Post('bulk')
   @ApiOkResponse({
     description: 'Bulk added candidates successfully',
+  })
+  @ApiOperation({
+    deprecated: true,
+    description:
+      'To add multiple candidates, consider using the POST /election to create a new election with candidates',
   })
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)

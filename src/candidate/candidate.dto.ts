@@ -4,6 +4,7 @@ import { Candidate } from 'src/schemas/candidate.schema'
 export class BulkAddResponseDTO {
   @ApiProperty() created: number
   @ApiProperty() updated: number
+  @ApiProperty() ids: string[]
 }
 
 export class BulkAddRequestDTO {
