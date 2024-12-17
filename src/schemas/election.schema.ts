@@ -7,7 +7,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 @Schema()
 export class Election {
-  @ApiProperty() @Prop({ required: true }) year: number
+  @ApiProperty()
+  @Virtual({
+    get: function (this: Election) {
+      return this.startDate.getFullYear()
+    },
+  })
+  year: number
   @ApiProperty() @Prop([String]) positions: string[]
   @ApiProperty()
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })

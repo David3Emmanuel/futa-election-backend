@@ -91,7 +91,6 @@ export class ElectionService {
     }
 
     const election = new this.model({
-      year: currentYear,
       start,
       end,
       candidates: new_candidates,
