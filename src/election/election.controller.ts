@@ -20,7 +20,11 @@ import {
   ApiOperation,
 } from '@nestjs/swagger'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
-import { CreateElectionDTO, UpdateElectionDTO } from './election.dto'
+import {
+  CreateElectionDTO,
+  ElectionSummary,
+  UpdateElectionDTO,
+} from './election.dto'
 
 @Controller('election')
 export class ElectionController {
@@ -38,6 +42,22 @@ export class ElectionController {
     return this.electionService.getActiveElection()
   }
 
+  @Get('active/summary')
+  @ApiOkResponse({
+    description: 'Get the active election summary',
+    type: ElectionSummary,
+  })
+  @ApiNotFoundResponse({
+    description: 'There is no active election',
+  })
+  @ApiOperation({
+    summary: 'Get the active election summary',
+    description: 'Not fully implemented yet.',
+  })
+  async getActiveElectionSummary() {
+    return this.electionService.getActiveElectionSummary()
+  }
+
   @Get('latest')
   @ApiOkResponse({
     description: 'Get the latest election',
@@ -50,6 +70,22 @@ export class ElectionController {
     return this.electionService.getLatestElection()
   }
 
+  @Get('latest/summary')
+  @ApiOkResponse({
+    description: 'Get the latest election summary',
+    type: ElectionSummary,
+  })
+  @ApiNotFoundResponse({
+    description: 'No elections found',
+  })
+  @ApiOperation({
+    summary: 'Get the latest election summary',
+    description: 'Not fully implemented yet.',
+  })
+  async getLatestElectionSummary() {
+    return this.electionService.getLatestElectionSummary()
+  }
+
   @Get(':year')
   @ApiOkResponse({
     description: 'Get election by year',
@@ -60,6 +96,22 @@ export class ElectionController {
   })
   getElectionByYear(@Param('year') year: number) {
     return this.electionService.getElectionByYear(year)
+  }
+
+  @Get(':year/summary')
+  @ApiOkResponse({
+    description: 'Get election summary by year',
+    type: ElectionSummary,
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiOperation({
+    summary: 'Get election summary by year',
+    description: 'Not fully implemented yet.',
+  })
+  async getElectionSummaryByYear(@Param('year') year: number) {
+    return this.electionService.getElectionSummaryByYear(year)
   }
 
   @ApiBearerAuth()

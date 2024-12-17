@@ -6,10 +6,18 @@ import {
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
-import { Election, extractElection } from 'src/schemas/election.schema'
+import {
+  Election,
+  ElectionWithId,
+  extractElection,
+} from 'src/schemas/election.schema'
 import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
-import { CreateElectionDTO, UpdateElectionDTO } from './election.dto'
+import {
+  CreateElectionDTO,
+  ElectionSummary,
+  UpdateElectionDTO,
+} from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
 import { Candidate } from 'src/schemas/candidate.schema'
@@ -39,10 +47,24 @@ export class ElectionService {
     return hideVotes(latest)
   }
 
+  async getLatestElectionSummary() {
+    const latest = await this.getLatestElectionWithVotes()
+    if (!latest) throw new NotFoundException('No elections found')
+    return this.generateElectionSummary(latest)
+  }
+
   async getActiveElection(): Promise<ElectionWithoutVotes> {
     const latest = await this.getLatestElection()
     if (latest.active) return latest
     throw new NotFoundException('There is no active election')
+  }
+
+  async getActiveElectionSummary() {
+    const latest = await this.getLatestElectionWithVotes()
+    if (!latest) throw new NotFoundException('No elections found')
+    if (!latest.active)
+      throw new NotFoundException('There is no active election')
+    return this.generateElectionSummary(latest)
   }
 
   async getElectionByYear(year: number): Promise<ElectionWithoutVotes> {
@@ -50,6 +72,13 @@ export class ElectionService {
     if (!election)
       throw new NotFoundException('Election not found for the given year')
     return hideVotes(election)
+  }
+
+  async getElectionSummaryByYear(year: number) {
+    const election = await this.getElectionByYearWithVotes(year)
+    if (!election)
+      throw new NotFoundException('Election not found for the given year')
+    return this.generateElectionSummary(election)
   }
 
   async createElection({
@@ -182,5 +211,18 @@ export class ElectionService {
     const active = await this.getActiveElection()
     if (!active) throw new NotFoundException('There is no active election')
     await this.model.updateOne({ _id: active._id }, { active: false })
+  }
+
+  private generateElectionSummary(election: ElectionWithId): ElectionSummary {
+    // TODO generate summary for each position
+    const summary = {}
+    return {
+      active: election.active,
+      endDate: election.endDate,
+      startDate: election.startDate,
+      totalVotes: election.votes?.length || 0,
+      year: election.year,
+      summary,
+    }
   }
 }
