@@ -23,10 +23,20 @@ export class ElectionService {
     private readonly voterService: VoterService,
   ) {}
 
+  private async getLatestElectionWithVotes() {
+    const election = await this.model.findOne().sort({ year: -1 }).exec()
+    return election ? extractElection(election) : null
+  }
+
+  private async getElectionByYearWithVotes(year: number) {
+    const election = await this.model.findOne({ year }).exec()
+    return election ? extractElection(election) : null
+  }
+
   async getLatestElection(): Promise<ElectionWithoutVotes> {
-    const latest = await this.model.findOne().sort({ year: -1 }).exec()
+    const latest = await this.getLatestElectionWithVotes()
     if (!latest) throw new NotFoundException('No elections found')
-    return hideVotes(extractElection(latest))
+    return hideVotes(latest)
   }
 
   async getActiveElection(): Promise<ElectionWithoutVotes> {
@@ -36,10 +46,10 @@ export class ElectionService {
   }
 
   async getElectionByYear(year: number): Promise<ElectionWithoutVotes> {
-    const election = await this.model.findOne({ year }).exec()
+    const election = await this.getElectionByYearWithVotes(year)
     if (!election)
       throw new NotFoundException('Election not found for the given year')
-    return hideVotes(extractElection(election))
+    return hideVotes(election)
   }
 
   async createElection({
