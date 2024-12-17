@@ -65,3 +65,18 @@ export class UpdateElectionDTO {
   @IsOptional()
   voters?: Voter[]
 }
+
+export interface PositionSummary {
+  totalVotes: number
+  candidates: string[]
+  leadingCandidates: string[]
+}
+
+export class ElectionSummary {
+  totalVotes: number
+  summary: Record<string, PositionSummary>
+  year: number
+  startDate: Date
+  endDate: Date
+  active: boolean
+}
