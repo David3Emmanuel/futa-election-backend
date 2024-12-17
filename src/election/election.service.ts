@@ -10,10 +10,15 @@ import { Election, extractElection } from 'src/schemas/election.schema'
 import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
 import { CreateElectionDTO } from './election.dto'
+import { CandidateService } from 'src/candidate/candidate.service'
+import { Candidate } from 'src/schemas/candidate.schema'
 
 @Injectable()
 export class ElectionService {
-  constructor(@InjectModel(Election.name) private model: Model<Election>) {}
+  constructor(
+    @InjectModel(Election.name) private model: Model<Election>,
+    private readonly candidateService: CandidateService,
+  ) {}
 
   async getLatestElection(): Promise<ElectionWithoutVotes> {
     const latest = await this.model.findOne().sort({ year: -1 }).exec()
@@ -34,7 +39,11 @@ export class ElectionService {
     return hideVotes(extractElection(election))
   }
 
-  async createElection({ start, end }: CreateElectionDTO): Promise<void> {
+  async createElection({
+    start,
+    end,
+    candidates,
+  }: CreateElectionDTO): Promise<void> {
     const currentYear = new Date().getFullYear()
     if (start) {
       // Ensure the start date is between now and end of the year
@@ -71,7 +80,22 @@ export class ElectionService {
       if (!(e instanceof NotFoundException)) throw e
     }
 
-    const election = new this.model({ year: currentYear, active: true })
+    let new_candidates: Candidate[] | undefined
+    if (candidates) {
+      const { ids } = await this.candidateService.bulkAddCandidates(candidates)
+      new_candidates = []
+      ids.forEach(async (id) => {
+        const candidate = await this.candidateService.getCandidateById(id)
+        new_candidates!.push(candidate)
+      })
+    }
+
+    const election = new this.model({
+      year: currentYear,
+      start,
+      end,
+      candidates: new_candidates,
+    })
     await election.save()
   }
 

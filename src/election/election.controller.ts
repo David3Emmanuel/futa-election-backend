@@ -17,6 +17,7 @@ import {
   ApiUnauthorizedResponse,
   ApiConflictResponse,
   ApiBadRequestResponse,
+  ApiOperation,
 } from '@nestjs/swagger'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
 import { CreateElectionDTO } from './election.dto'
@@ -76,6 +77,11 @@ export class ElectionController {
   })
   @ApiBadRequestResponse({
     description: 'Invalid start or end date',
+  })
+  @ApiOperation({
+    summary: 'Create a new election for the current year',
+    description:
+      'Create a new election for the current year. All parameters are optional.',
   })
   createElection(@Body() createElectionDTO: CreateElectionDTO) {
     return this.electionService.createElection(createElectionDTO)

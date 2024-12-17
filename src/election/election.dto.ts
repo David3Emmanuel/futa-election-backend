@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsDate, IsOptional } from 'class-validator'
+import { Candidate } from 'src/schemas/candidate.schema'
 
 export class CreateElectionDTO {
   @ApiProperty({
@@ -16,4 +17,11 @@ export class CreateElectionDTO {
   @IsOptional()
   @IsDate()
   end?: Date
+
+  @ApiProperty({
+    description: 'A list containing new/updated candidates',
+    type: [Candidate],
+  })
+  @IsOptional()
+  candidates?: Candidate[]
 }
