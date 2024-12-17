@@ -66,17 +66,25 @@ export class UpdateElectionDTO {
   voters?: Voter[]
 }
 
-export interface PositionSummary {
-  totalVotes: number
-  candidates: string[]
-  leadingCandidates: string[]
+export class PositionSummary {
+  @ApiProperty() totalVotes: number
+  @ApiProperty() candidates: string[]
+  @ApiProperty() leadingCandidates: string[]
 }
 
 export class ElectionSummary {
-  totalVotes: number
+  @ApiProperty() totalVotes: number
+  @ApiProperty({
+    type: 'object',
+    properties: {
+      totalVotes: { type: 'number' },
+      candidates: { type: 'array', items: { type: 'string' } },
+      leadingCandidates: { type: 'array', items: { type: 'string' } },
+    },
+  })
   summary: Record<string, PositionSummary>
-  year: number
-  startDate: Date
-  endDate: Date
-  active: boolean
+  @ApiProperty() year: number
+  @ApiProperty() startDate: Date
+  @ApiProperty() endDate: Date
+  @ApiProperty() active: boolean
 }
