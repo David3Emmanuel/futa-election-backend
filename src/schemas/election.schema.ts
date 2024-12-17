@@ -14,7 +14,8 @@ export class Election {
     },
   })
   year: number
-  @ApiProperty() @Prop([String]) positions: string[]
+  // @ApiProperty() @Prop([String]) positions: string[]
+  // FIXME ensure only specified positions can be used
   @ApiProperty()
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })
   voters: Voter[]
