@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsDate, IsOptional } from 'class-validator'
 import { Candidate } from 'src/schemas/candidate.schema'
+import { Voter } from 'src/schemas/voter.schema'
 
 export class CreateElectionDTO {
   @ApiProperty({
@@ -24,6 +25,13 @@ export class CreateElectionDTO {
   })
   @IsOptional()
   candidates?: Candidate[]
+
+  @ApiProperty({
+    description: 'A list containing new/updated voters',
+    type: [Voter],
+  })
+  @IsOptional()
+  voters?: Voter[]
 }
 
 export class UpdateElectionDTO {
@@ -48,4 +56,12 @@ export class UpdateElectionDTO {
   })
   @IsOptional()
   candidates?: Candidate[]
+
+  @ApiProperty({
+    description:
+      'A list containing new/updated voters. Does not support deletion',
+    type: [Voter],
+  })
+  @IsOptional()
+  voters?: Voter[]
 }

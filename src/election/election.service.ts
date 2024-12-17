@@ -11,13 +11,16 @@ import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
 import { CreateElectionDTO, UpdateElectionDTO } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
+import { VoterService } from 'src/voter/voter.service'
 import { Candidate } from 'src/schemas/candidate.schema'
+import { Voter } from 'src/schemas/voter.schema'
 
 @Injectable()
 export class ElectionService {
   constructor(
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
+    private readonly voterService: VoterService,
   ) {}
 
   async getLatestElection(): Promise<ElectionWithoutVotes> {
@@ -43,6 +46,7 @@ export class ElectionService {
     start,
     end,
     candidates,
+    voters,
   }: CreateElectionDTO): Promise<void> {
     const currentYear = new Date().getFullYear()
     if (start) {
@@ -90,10 +94,21 @@ export class ElectionService {
       })
     }
 
+    let new_voters: Voter[] | undefined
+    if (voters) {
+      const { ids } = await this.voterService.bulkAddVoters(voters)
+      new_voters = []
+      ids.forEach(async (id) => {
+        const voter = await this.voterService.getVoterById(id)
+        new_voters!.push(voter)
+      })
+    }
+
     const election = new this.model({
       start,
       end,
       candidates: new_candidates,
+      voters: new_voters,
     })
     await election.save()
   }
@@ -104,7 +119,7 @@ export class ElectionService {
   ): Promise<void> {
     const election = await this.getElectionByYear(year)
     let { start, end } = updateElectionDTO
-    const { candidates } = updateElectionDTO
+    const { candidates, voters } = updateElectionDTO
 
     if (start) {
       // Ensure the start date is between now and end of the year
@@ -135,7 +150,22 @@ export class ElectionService {
       })
     }
 
-    await new this.model({ start, end, candidates: new_candidates }).save()
+    let new_voters: Voter[] | undefined
+    if (voters) {
+      const { ids } = await this.voterService.bulkAddVoters(voters)
+      new_voters = []
+      ids.forEach(async (id) => {
+        const voter = await this.voterService.getVoterById(id)
+        new_voters!.push(voter)
+      })
+    }
+
+    await new this.model({
+      start,
+      end,
+      candidates: new_candidates,
+      voters: new_voters,
+    }).save()
   }
 
   async endActiveElection(): Promise<void> {

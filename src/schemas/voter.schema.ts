@@ -2,16 +2,16 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
 import { ApiProperty } from '@nestjs/swagger'
 import { Document, HydratedDocument, Types } from 'mongoose'
 
-export type VoterWithId = Voter & {
-  _id: Types.ObjectId
-}
-
 @Schema()
 export class Voter {
   @ApiProperty()
   @Prop({ required: true, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
   email: string
   @ApiProperty() @Prop({ required: true }) name: string
+}
+
+export class VoterWithId extends Voter {
+  _id: Types.ObjectId
 }
 
 export function extractVoter(voterDocument: Document<unknown, object, Voter>) {
