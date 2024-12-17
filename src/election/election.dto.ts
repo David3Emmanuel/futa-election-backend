@@ -25,3 +25,27 @@ export class CreateElectionDTO {
   @IsOptional()
   candidates?: Candidate[]
 }
+
+export class UpdateElectionDTO {
+  @ApiProperty({
+    description: 'A date between now and end of the year',
+  })
+  @IsOptional()
+  @IsDate()
+  start?: Date
+
+  @ApiProperty({
+    description: 'A date after the start date',
+  })
+  @IsOptional()
+  @IsDate()
+  end?: Date
+
+  @ApiProperty({
+    description:
+      'A list containing new/updated candidates. Does not support deletion',
+    type: [Candidate],
+  })
+  @IsOptional()
+  candidates?: Candidate[]
+}

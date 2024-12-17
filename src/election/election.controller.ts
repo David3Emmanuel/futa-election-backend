@@ -20,7 +20,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
-import { CreateElectionDTO } from './election.dto'
+import { CreateElectionDTO, UpdateElectionDTO } from './election.dto'
 
 @Controller('election')
 export class ElectionController {
@@ -101,5 +101,31 @@ export class ElectionController {
   })
   endActiveElection() {
     return this.electionService.endActiveElection()
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @Patch(':year')
+  @ApiOperation({
+    summary: 'Update election by year',
+    description: 'WARNING: This will delete all existing votes',
+  })
+  @ApiOkResponse({
+    description: 'Update election by year',
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid data',
+  })
+  updateElectionByYear(
+    @Param('year') year: number,
+    @Body() updateElectionDTO: UpdateElectionDTO,
+  ) {
+    return this.electionService.updateElectionByYear(year, updateElectionDTO)
   }
 }

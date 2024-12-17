@@ -9,7 +9,7 @@ import { Model } from 'mongoose'
 import { Election, extractElection } from 'src/schemas/election.schema'
 import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
-import { CreateElectionDTO } from './election.dto'
+import { CreateElectionDTO, UpdateElectionDTO } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { Candidate } from 'src/schemas/candidate.schema'
 
@@ -96,6 +96,46 @@ export class ElectionService {
       candidates: new_candidates,
     })
     await election.save()
+  }
+
+  async updateElectionByYear(
+    year: number,
+    updateElectionDTO: UpdateElectionDTO,
+  ): Promise<void> {
+    const election = await this.getElectionByYear(year)
+    let { start, end } = updateElectionDTO
+    const { candidates } = updateElectionDTO
+
+    if (start) {
+      // Ensure the start date is between now and end of the year
+      if (start.getFullYear() !== year || start < new Date())
+        throw new BadRequestException('Invalid start date')
+    } else {
+      start = election.startDate
+    }
+
+    if (end) {
+      // Ensure the end date is between start and end of the year
+      if (end < start) throw new BadRequestException('Invalid end date')
+    } else if (election.endDate < start) {
+      throw new BadRequestException(
+        'End date required for the given start date',
+      )
+    } else {
+      end = election.endDate
+    }
+
+    let new_candidates: Candidate[] | undefined
+    if (candidates) {
+      const { ids } = await this.candidateService.bulkAddCandidates(candidates)
+      new_candidates = []
+      ids.forEach(async (id) => {
+        const candidate = await this.candidateService.getCandidateById(id)
+        new_candidates!.push(candidate)
+      })
+    }
+
+    await new this.model({ start, end, candidates: new_candidates }).save()
   }
 
   async endActiveElection(): Promise<void> {
