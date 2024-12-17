@@ -35,11 +35,11 @@ export class UsersService {
 
     const salt = await bcrypt.genSalt()
     const passwordHash = await bcrypt.hash(userDetails.password, salt)
-    this.model.create({
+    await new this.model({
       ...userDetails,
       password: undefined,
       passwordHash,
-    })
+    }).save()
   }
 
   async validatePassword(password: string, hash: string): Promise<boolean> {

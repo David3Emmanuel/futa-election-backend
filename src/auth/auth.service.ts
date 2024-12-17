@@ -25,7 +25,7 @@ export class AuthService {
   async createUser(userDetails: SignUpDTO) {
     const user = await this.usersService.getUserByEmail(userDetails.email)
     if (user) throw new ConflictException()
-    this.usersService.createUser(userDetails)
+    await this.usersService.createUser(userDetails)
   }
 
   async login(user: PublicUser) {
