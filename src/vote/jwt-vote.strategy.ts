@@ -13,16 +13,11 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
     })
   }
 
-  validate(payload: Voter & { iat: number; exp: number }) {
+  validate(payload: Voter & { iat: number; exp: number }): Voter {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { iat, exp, ...rest } = payload
-    const voter = rest as Voter
-    if (!voter) throw new UnauthorizedException('Invalid token')
-    if (!voter.email)
-      throw new UnauthorizedException('Invalid token. Email is required')
-    if (!voter.name)
-      throw new UnauthorizedException('Invalid token. Name is required')
+    if (!(payload.email && payload.name))
+      throw new UnauthorizedException('Invalid voter token')
 
-    return voter
+    return { email: payload.email, name: payload.name }
   }
 }
