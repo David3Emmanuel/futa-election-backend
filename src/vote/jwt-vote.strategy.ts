@@ -1,11 +1,12 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { Voter } from 'src/schemas/voter.schema'
+import { Voter, VoterWithId } from 'src/schemas/voter.schema'
+import { VoterService } from 'src/voter/voter.service'
 
 @Injectable()
 export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
-  constructor() {
+  constructor(private readonly voterService: VoterService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,11 +14,22 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
     })
   }
 
-  validate(payload: Voter & { iat: number; exp: number }): Voter {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    if (!(payload.email && payload.name))
-      throw new UnauthorizedException('Invalid voter token')
+  async validate(
+    payload: Voter & { iat: number; exp: number },
+  ): Promise<VoterWithId> {
+    const { email, name } = payload
 
-    return { email: payload.email, name: payload.name }
+    if (!(email && name)) {
+      console.warn('Detected vote attempt without email/name')
+      throw new UnauthorizedException('Invalid voter token')
+    }
+
+    const voter = await this.voterService.getVoterByName(email)
+    if (voter?.email !== email) {
+      console.warn('Detected vote attempt with wrong email')
+      throw new UnauthorizedException('Invalid voter token')
+    }
+
+    return voter
   }
 }

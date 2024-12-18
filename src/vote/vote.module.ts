@@ -6,6 +6,7 @@ import { ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { JWTVoteStrategy } from './jwt-vote.strategy'
 import { ElectionModule } from 'src/election/election.module'
+import { VoterModule } from 'src/voter/voter.module'
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ElectionModule } from 'src/election/election.module'
       }),
     }),
     ElectionModule,
+    VoterModule,
   ],
   controllers: [VoteController],
   providers: [VoteService, JWTVoteStrategy],
