@@ -16,5 +16,6 @@ import { VoterModule } from 'src/voter/voter.module'
   ],
   providers: [ElectionService],
   controllers: [ElectionController],
+  exports: [ElectionService],
 })
 export class ElectionModule {}

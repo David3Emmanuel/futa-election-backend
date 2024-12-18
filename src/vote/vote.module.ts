@@ -5,6 +5,7 @@ import { EmailModule } from 'src/email/email.module'
 import { ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { JWTVoteStrategy } from './jwt-vote.strategy'
+import { ElectionModule } from 'src/election/election.module'
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { JWTVoteStrategy } from './jwt-vote.strategy'
         signOptions: { expiresIn: '1d' },
       }),
     }),
+    ElectionModule,
   ],
   controllers: [VoteController],
   providers: [VoteService, JWTVoteStrategy],
