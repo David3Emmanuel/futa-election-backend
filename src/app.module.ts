@@ -6,6 +6,7 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { ElectionModule } from './election/election.module'
 import { CandidateModule } from './candidate/candidate.module'
 import { VoterModule } from './voter/voter.module'
+import { VoteModule } from './vote/vote.module'
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { VoterModule } from './voter/voter.module'
     ElectionModule,
     CandidateModule,
     VoterModule,
+    VoteModule,
   ],
 })
 export class AppModule {}
