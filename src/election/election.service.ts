@@ -229,14 +229,8 @@ export class ElectionService {
     election: ElectionWithId,
   ): Promise<ElectionSummary> {
     // generate summary for each position
-    const candidates = await Promise.all(
-      election.candidateIds.map((id) =>
-        this.candidateService.getCandidateById(id),
-      ),
-    )
-    const positions = new Set(
-      candidates.map((candidate) => candidate.currentPosition),
-    )
+    const { positions, candidates } =
+      await this.retrieveCandidatesAndPositions(election)
 
     return {
       active: isActive(election),
@@ -253,6 +247,18 @@ export class ElectionService {
         }),
       ),
     }
+  }
+
+  private async retrieveCandidatesAndPositions(election: ElectionWithId) {
+    const candidates = await Promise.all(
+      election.candidateIds.map((id) =>
+        this.candidateService.getCandidateById(id),
+      ),
+    )
+    const positions = new Set(
+      candidates.map((candidate) => candidate.currentPosition),
+    )
+    return { positions, candidates }
   }
 
   private generatePositionSummary(
