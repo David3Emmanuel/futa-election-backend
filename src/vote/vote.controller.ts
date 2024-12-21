@@ -1,13 +1,17 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JWTVoteGuard } from './jwt-vote.guard'
-import { Voter } from 'src/schemas/voter.schema'
+import { Voter, VoterWithId } from 'src/schemas/voter.schema'
 import { VoteDTO } from './vote.dto'
 import { VoteService } from './vote.service'
+import { ElectionService } from 'src/election/election.service'
 
 @Controller('vote')
 export class VoteController {
-  constructor(private readonly voteService: VoteService) {}
+  constructor(
+    private readonly voteService: VoteService,
+    private readonly electionService: ElectionService,
+  ) {}
 
   @ApiOperation({ summary: 'Cast a vote' })
   @ApiBearerAuth()
@@ -15,9 +19,12 @@ export class VoteController {
   @Post()
   async vote(
     @Body() voteDto: VoteDTO,
-    @Request() req: Request & { user: Voter },
+    @Request() req: Request & { user: VoterWithId },
   ) {
-    return { voter: req.user, voteDto }
+    return this.electionService.castVote(
+      req.user._id.toString(),
+      voteDto.candidateId,
+    )
   }
 
   @Post('token')

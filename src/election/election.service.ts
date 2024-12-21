@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
@@ -229,5 +230,34 @@ export class ElectionService {
       year: getYear(election),
       summary,
     }
+  }
+
+  async castVote(voterId: string, candidateId: string) {
+    const election = await this.getLatestElectionWithVotes()
+    if (!election) throw new NotFoundException('No elections found')
+    if (!isActive(election))
+      throw new NotFoundException('There is no active election')
+
+    // Confirm that voter belongs this election
+    if (!election.voterIds.includes(voterId))
+      throw new UnauthorizedException('Cannot participate in this election')
+
+    // Confirm that candidate belongs this election
+    if (!election.candidateIds.includes(candidateId))
+      throw new NotFoundException('Candidate not found in this election')
+
+    // Confirm that voter has not voted before
+    // FIXME this should be checked for only candidates's position
+    if (election.votes) {
+      if (election.votes.find((vote) => vote.voterId === voterId))
+        throw new ConflictException('Voter has already voted')
+    } else {
+      election.votes = []
+    }
+
+    election.votes.push({ voterId, candidateId })
+    await this.model.updateOne({ _id: election._id }, { votes: election.votes })
+
+    return { message: 'Vote cast successfully', voterId, candidateId }
   }
 }
