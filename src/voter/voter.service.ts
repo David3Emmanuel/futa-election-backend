@@ -38,9 +38,7 @@ export class VoterService {
       throw new ConflictException('Voter already exists')
     } catch (e) {
       if (e instanceof NotFoundException) {
-        console.log('  Creating new voter:', voter.name)
         await new this.model(voter).save()
-        console.log('  Created voter', new this.model(voter)._id)
       } else throw e
     }
   }
@@ -70,26 +68,17 @@ export class VoterService {
       voters.map(async (voter) => {
         try {
           const existing = await this.getVoterByName(voter.name)
-          console.log(
-            'Found existing voter: ',
-            voter.name,
-            existing._id.toString(),
-          )
           await this.updateVoter(existing._id.toString(), voter)
           updated += 1
           ids.push(existing._id.toString())
         } catch (e) {
           if (e instanceof NotFoundException) {
-            console.log('Adding new voter: ', voter.name)
             await this.createVoter(voter)
             created += 1
             const new_voter = await this.getVoterByName(voter.name)
-            console.log('New voter: ', new_voter)
             ids.push(new_voter._id.toString())
           } else throw e
         }
-
-        console.log({ created, updated, ids })
       }),
     )
 
