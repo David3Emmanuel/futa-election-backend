@@ -15,17 +15,12 @@ import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
 import {
   CreateElectionDTO,
+  CreateElectionResponse,
   ElectionSummary,
   UpdateElectionDTO,
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
-import { BulkAddResponseDTO } from 'src/candidate/candidate.dto'
-
-type ElectionBulkResponseDTO = Partial<{
-  candidates: BulkAddResponseDTO
-  voters: BulkAddResponseDTO
-}>
 
 @Injectable()
 export class ElectionService {
@@ -92,7 +87,7 @@ export class ElectionService {
     voters,
   }: CreateElectionDTO): Promise<{
     message: string
-    bulk: ElectionBulkResponseDTO
+    bulk: CreateElectionResponse
   }> {
     const currentYear = new Date().getFullYear()
     if (start) {
@@ -130,7 +125,7 @@ export class ElectionService {
       if (!(e instanceof NotFoundException)) throw e
     }
 
-    const response: ElectionBulkResponseDTO = {}
+    const response = new CreateElectionResponse()
 
     let new_candidates: string[] | undefined
     if (candidates) {
@@ -159,10 +154,7 @@ export class ElectionService {
   async updateElectionByYear(
     year: number,
     updateElectionDTO: UpdateElectionDTO,
-  ): Promise<{
-    message: string
-    bulk: ElectionBulkResponseDTO
-  }> {
+  ) {
     const election = await this.getElectionByYear(year)
     let { start, end } = updateElectionDTO
     const { candidates, voters } = updateElectionDTO
@@ -186,7 +178,7 @@ export class ElectionService {
       end = election.endDate
     }
 
-    const response: ElectionBulkResponseDTO = {}
+    const response = new CreateElectionResponse()
 
     let new_candidates: string[] | undefined
     if (candidates) {
@@ -208,7 +200,7 @@ export class ElectionService {
       voterIds: new_voters,
     }).save()
 
-    return { message: 'Success', bulk: response }
+    return response
   }
 
   async endActiveElection(): Promise<void> {

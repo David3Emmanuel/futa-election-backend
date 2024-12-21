@@ -24,6 +24,7 @@ import {
   CreateElectionDTO,
   ElectionSummary,
   UpdateElectionDTO,
+  CreateElectionResponse,
 } from './election.dto'
 
 @Controller('election')
@@ -119,6 +120,7 @@ export class ElectionController {
   @Post()
   @ApiCreatedResponse({
     description: 'Create a new election for the current year',
+    type: CreateElectionResponse,
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized',
@@ -164,6 +166,7 @@ export class ElectionController {
   })
   @ApiOkResponse({
     description: 'Update election by year',
+    type: CreateElectionResponse,
   })
   @ApiNotFoundResponse({
     description: 'Election not found for the given year',

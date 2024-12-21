@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsDate, IsOptional } from 'class-validator'
+import { BulkAddResponseDTO } from 'src/candidate/candidate.dto'
 import { Candidate } from 'src/schemas/candidate.schema'
 import { Voter } from 'src/schemas/voter.schema'
 
@@ -87,4 +88,10 @@ export class ElectionSummary {
   @ApiProperty() startDate: Date
   @ApiProperty() endDate: Date
   @ApiProperty() active: boolean
+}
+
+export class CreateElectionResponse {
+  message: 'Success'
+  candidates?: BulkAddResponseDTO
+  voters?: BulkAddResponseDTO
 }
