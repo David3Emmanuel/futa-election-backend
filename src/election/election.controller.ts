@@ -87,6 +87,11 @@ export class ElectionController {
     return this.electionService.getLatestElectionSummary()
   }
 
+  @Get('send-emails')
+  sendEmails() {
+    return this.electionService.sendBulkEmails()
+  }
+
   @Get(':year')
   @ApiOkResponse({
     description: 'Get election by year',
