@@ -20,12 +20,14 @@ import {
   CreateElectionDTO,
   CreateElectionResponse,
   ElectionSummary,
+  PositionSummary,
   UpdateElectionDTO,
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
 import { EmailService } from 'src/email/email.service'
 import { VoteService } from 'src/vote/vote.service'
+import { CandidateWithId } from 'src/schemas/candidate.schema'
 
 @Injectable()
 export class ElectionService {
@@ -223,16 +225,78 @@ export class ElectionService {
     await this.model.updateOne({ _id: active._id }, { endDate: new Date() })
   }
 
-  private generateElectionSummary(election: ElectionWithId): ElectionSummary {
-    // TODO generate summary for each position
-    const summary = {}
+  private async generateElectionSummary(
+    election: ElectionWithId,
+  ): Promise<ElectionSummary> {
+    // generate summary for each position
+    const candidates = await Promise.all(
+      election.candidateIds.map((id) =>
+        this.candidateService.getCandidateById(id),
+      ),
+    )
+    const positions = new Set(
+      candidates.map((candidate) => candidate.currentPosition),
+    )
+
     return {
       active: isActive(election),
       endDate: election.endDate,
       startDate: election.startDate,
       totalVotes: election.votes?.length || 0,
       year: getYear(election),
-      summary,
+      positions: Object.fromEntries(
+        [...positions].map((position) => {
+          return [
+            position,
+            this.generatePositionSummary(election, position, candidates),
+          ]
+        }),
+      ),
+    }
+  }
+
+  private generatePositionSummary(
+    election: ElectionWithId,
+    position: string,
+    allCandidates: CandidateWithId[],
+  ): PositionSummary {
+    const positionCandidates = allCandidates.filter(
+      (candidate) => candidate.currentPosition === position,
+    )
+
+    const relevantVotes = election.votes?.filter((vote) =>
+      positionCandidates.some(
+        (candidate) => candidate._id.toString() === vote.candidateId,
+      ),
+    )
+
+    const totalVotes = relevantVotes?.length || 0
+    const numberOfVotes = new Map<string, number>()
+
+    positionCandidates.forEach((candidate) => {
+      numberOfVotes.set(candidate._id.toString(), 0)
+    })
+
+    relevantVotes?.forEach((vote) => {
+      const candidateId = vote.candidateId
+      numberOfVotes.set(candidateId, numberOfVotes.get(candidateId)! + 1)
+    })
+
+    const sortedCandidates = positionCandidates.sort((a, b) => {
+      return (
+        (numberOfVotes.get(b._id.toString()) || 0) -
+        (numberOfVotes.get(a._id.toString()) || 0)
+      )
+    })
+
+    const leadingCandidates = sortedCandidates.map((candidate) => ({
+      candidate,
+      count: numberOfVotes.get(candidate._id.toString())!,
+    }))
+
+    return {
+      totalVotes,
+      leadingCandidates,
     }
   }
 

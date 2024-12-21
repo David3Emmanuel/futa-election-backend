@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsDate, IsOptional } from 'class-validator'
 import { BulkAddResponseDTO } from 'src/candidate/candidate.dto'
-import { Candidate } from 'src/schemas/candidate.schema'
+import { Candidate, CandidateWithId } from 'src/schemas/candidate.schema'
 import { Voter } from 'src/schemas/voter.schema'
 
 export class CreateElectionDTO {
@@ -67,10 +67,14 @@ export class UpdateElectionDTO {
   voters?: Voter[]
 }
 
+class CandidatePollResult {
+  candidate: CandidateWithId
+  count: number
+}
+
 export class PositionSummary {
   @ApiProperty() totalVotes: number
-  @ApiProperty() candidates: string[]
-  @ApiProperty() leadingCandidates: string[]
+  @ApiProperty() leadingCandidates: CandidatePollResult[]
 }
 
 export class ElectionSummary {
@@ -79,11 +83,19 @@ export class ElectionSummary {
     type: 'object',
     properties: {
       totalVotes: { type: 'number' },
-      candidates: { type: 'array', items: { type: 'string' } },
-      leadingCandidates: { type: 'array', items: { type: 'string' } },
+      leadingCandidates: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            candidate: { type: 'object' },
+            count: { type: 'number' },
+          },
+        },
+      },
     },
   })
-  summary: Record<string, PositionSummary>
+  positions: Record<string, PositionSummary>
   @ApiProperty() year: number
   @ApiProperty() startDate: Date
   @ApiProperty() endDate: Date
