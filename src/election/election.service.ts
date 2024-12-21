@@ -24,6 +24,7 @@ import {
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
+import { EmailService } from 'src/email/email.service'
 
 @Injectable()
 export class ElectionService {
@@ -31,6 +32,7 @@ export class ElectionService {
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
     private readonly voterService: VoterService,
+    private readonly emailService: EmailService,
   ) {}
 
   private async getLatestElectionWithVotes() {

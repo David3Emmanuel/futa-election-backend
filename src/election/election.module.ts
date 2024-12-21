@@ -5,6 +5,8 @@ import { MongooseModule } from '@nestjs/mongoose'
 import { Election, ElectionSchema } from 'src/schemas/election.schema'
 import { CandidateModule } from 'src/candidate/candidate.module'
 import { VoterModule } from 'src/voter/voter.module'
+import { EmailModule } from 'src/email/email.module'
+import { ConfigService } from '@nestjs/config'
 
 @Module({
   imports: [
@@ -13,6 +15,14 @@ import { VoterModule } from 'src/voter/voter.module'
     ]),
     CandidateModule,
     VoterModule,
+    EmailModule.registerAsync({
+      useFactory: (config: ConfigService) => ({
+        apiKey: config.getOrThrow<string>('MAILERSEND_API_KEY'),
+        senderDomain: config.getOrThrow<string>('SENDER_DOMAIN'),
+        senderName: 'FUTA Election',
+      }),
+      inject: [ConfigService],
+    }),
   ],
   providers: [ElectionService],
   controllers: [ElectionController],
