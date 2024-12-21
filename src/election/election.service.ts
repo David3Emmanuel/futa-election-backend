@@ -220,7 +220,7 @@ export class ElectionService {
   async endActiveElection(): Promise<void> {
     const active = await this.getActiveElection()
     if (!active) throw new NotFoundException('There is no active election')
-    await this.model.updateOne({ _id: active._id }, { active: false })
+    await this.model.updateOne({ _id: active._id }, { endDate: new Date() })
   }
 
   private generateElectionSummary(election: ElectionWithId): ElectionSummary {
