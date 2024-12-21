@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { ElectionService } from './election.service'
 import { ElectionController } from './election.controller'
 import { MongooseModule } from '@nestjs/mongoose'
@@ -7,6 +7,7 @@ import { CandidateModule } from 'src/candidate/candidate.module'
 import { VoterModule } from 'src/voter/voter.module'
 import { EmailModule } from 'src/email/email.module'
 import { ConfigService } from '@nestjs/config'
+import { VoteModule } from 'src/vote/vote.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ConfigService } from '@nestjs/config'
     ]),
     CandidateModule,
     VoterModule,
+    forwardRef(() => VoteModule),
     EmailModule.registerAsync({
       useFactory: (config: ConfigService) => ({
         apiKey: config.getOrThrow<string>('MAILERSEND_API_KEY'),

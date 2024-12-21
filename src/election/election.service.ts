@@ -25,6 +25,7 @@ import {
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
 import { EmailService } from 'src/email/email.service'
+import { VoteService } from 'src/vote/vote.service'
 
 @Injectable()
 export class ElectionService {
@@ -32,6 +33,7 @@ export class ElectionService {
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
     private readonly voterService: VoterService,
+    private readonly voteService: VoteService,
     private readonly emailService: EmailService,
   ) {}
 
@@ -261,5 +263,21 @@ export class ElectionService {
     await this.model.updateOne({ _id: election._id }, { votes: election.votes })
 
     return { message: 'Vote cast successfully', voterId, candidateId }
+  }
+
+  async sendBulkEmails() {
+    const election = await this.getLatestElectionWithVotes()
+    if (!election) throw new NotFoundException('No elections found')
+    if (!isActive(election))
+      throw new NotFoundException('There is no active election')
+
+    election.voterIds.forEach(async (voterId) => {
+      const voter = await this.voterService.getVoterById(voterId)
+      const token = await this.voteService.generateToken(voter)
+
+      const subject = 'Vote in the upcoming election'
+      const text = `Hello ${voter.name},\n\nPlease vote in the upcoming election.\n\nVoter token: ${token}\n\nRegards\nElection Committee`
+      await this.emailService.sendMail(voter.email, subject, text)
+    })
   }
 }

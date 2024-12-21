@@ -1,12 +1,12 @@
-import { Module } from '@nestjs/common'
+import { forwardRef, Module } from '@nestjs/common'
 import { VoteController } from './vote.controller'
 import { VoteService } from './vote.service'
 import { EmailModule } from 'src/email/email.module'
 import { ConfigService } from '@nestjs/config'
 import { JwtModule } from '@nestjs/jwt'
 import { JWTVoteStrategy } from './jwt-vote.strategy'
-import { ElectionModule } from 'src/election/election.module'
 import { VoterModule } from 'src/voter/voter.module'
+import { ElectionModule } from 'src/election/election.module'
 
 @Module({
   imports: [
@@ -25,10 +25,11 @@ import { VoterModule } from 'src/voter/voter.module'
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    ElectionModule,
+    forwardRef(() => ElectionModule),
     VoterModule,
   ],
   controllers: [VoteController],
   providers: [VoteService, JWTVoteStrategy],
+  exports: [VoteService],
 })
 export class VoteModule {}
