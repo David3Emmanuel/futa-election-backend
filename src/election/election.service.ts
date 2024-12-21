@@ -321,10 +321,18 @@ export class ElectionService {
       throw new NotFoundException('Candidate not found in this election')
 
     // Confirm that voter has not voted before
-    // FIXME this should be checked for only candidates's position
+    const candidate = await this.candidateService.getCandidateById(candidateId)
+
     if (election.votes) {
-      if (election.votes.find((vote) => vote.voterId === voterId))
-        throw new ConflictException('Voter has already voted')
+      if (
+        election.votes.find(
+          async (vote) =>
+            vote.voterId === voterId &&
+            (await this.candidateService.getCandidateById(vote.candidateId))
+              .currentPosition === candidate.currentPosition,
+        )
+      )
+        throw new ConflictException('Voter has already voted for this position')
     } else {
       election.votes = []
     }
