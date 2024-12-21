@@ -42,8 +42,8 @@ export class VoterController {
     type: VoterWithId,
   })
   @ApiNotFoundResponse({ description: 'Voter not found' })
-  getVoterByName(@Query('name') name: string) {
-    return this.voterService.getVoterByName(name)
+  getVoterByEmail(@Query('email') email: string) {
+    return this.voterService.getVoterByEmail(email)
   }
 
   @Get(':id')

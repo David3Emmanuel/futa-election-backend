@@ -22,10 +22,10 @@ export class VoterService {
     return extractVoter(voter)
   }
 
-  async getVoterByName(name: string): Promise<VoterWithId> {
+  async getVoterByEmail(email: string): Promise<VoterWithId> {
     const voter = await this.model
       .findOne({
-        name: name,
+        email,
       })
       .exec()
     if (!voter) throw new NotFoundException('Voter not found')
@@ -34,7 +34,7 @@ export class VoterService {
 
   async createVoter(voter: Voter): Promise<void> {
     try {
-      await this.getVoterByName(voter.name)
+      await this.getVoterByEmail(voter.email)
       throw new ConflictException('Voter already exists')
     } catch (e) {
       if (e instanceof NotFoundException) {
@@ -67,7 +67,7 @@ export class VoterService {
     await Promise.all(
       voters.map(async (voter) => {
         try {
-          const existing = await this.getVoterByName(voter.name)
+          const existing = await this.getVoterByEmail(voter.email)
           await this.updateVoter(existing._id.toString(), voter)
           updated += 1
           ids.push(existing._id.toString())
@@ -75,7 +75,7 @@ export class VoterService {
           if (e instanceof NotFoundException) {
             await this.createVoter(voter)
             created += 1
-            const new_voter = await this.getVoterByName(voter.name)
+            const new_voter = await this.getVoterByEmail(voter.email)
             ids.push(new_voter._id.toString())
           } else throw e
         }
