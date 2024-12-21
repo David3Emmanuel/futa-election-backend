@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { MailerSend, Sender } from 'mailersend'
+import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend'
 import { EmailModuleOptions } from './email.types'
 import { MODULE_OPTIONS_TOKEN } from './email.module-definition'
 
@@ -14,6 +14,21 @@ export class EmailService {
     }
 
     this.mailerSend = new MailerSend({ apiKey: options.apiKey })
-    this.sender = new Sender(options.senderDomain, options.senderName)
+    this.sender = new Sender(
+      `noreply@${options.senderDomain}`,
+      options.senderName,
+    )
+  }
+
+  async sendMail(to: string, subject: string, text: string) {
+    const recipient = new Recipient(to)
+
+    const emailParams = new EmailParams()
+      .setFrom(this.sender)
+      .setSubject(subject)
+      .setText(text)
+      .setTo([recipient])
+
+    return await this.mailerSend.email.send(emailParams)
   }
 }
