@@ -276,8 +276,19 @@ export class ElectionService {
       const token = await this.voteService.generateToken(voter)
 
       const subject = 'Vote in the upcoming election'
-      const text = `Hello ${voter.name},\n\nPlease vote in the upcoming election.\n\nVoter token: ${token}\n\nRegards\nElection Committee`
-      await this.emailService.sendMail(voter.email, subject, text)
+      await this.emailService.sendMailWithTemplate(
+        voter.email,
+        subject,
+        '0r83ql3kzkv4zw1j',
+        {
+          email: voter.email,
+          data: {
+            name: voter.name,
+            link: `http://localhost:3000/vote?token=${token}`,
+            endDate: election.endDate.toDateString(),
+          },
+        },
+      )
     })
   }
 }

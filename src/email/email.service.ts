@@ -31,4 +31,22 @@ export class EmailService {
 
     return await this.mailerSend.email.send(emailParams)
   }
+
+  async sendMailWithTemplate(
+    to: string,
+    subject: string,
+    templateId: string,
+    personalization: any,
+  ) {
+    const recipient = new Recipient(to)
+
+    const emailParams = new EmailParams()
+      .setFrom(this.sender)
+      .setSubject(subject)
+      .setTemplateId(templateId)
+      .setPersonalization([personalization])
+      .setTo([recipient])
+
+    return await this.mailerSend.email.send(emailParams)
+  }
 }
