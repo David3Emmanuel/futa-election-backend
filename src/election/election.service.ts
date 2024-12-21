@@ -31,12 +31,19 @@ export class ElectionService {
   ) {}
 
   private async getLatestElectionWithVotes() {
-    const election = await this.model.findOne().sort({ year: -1 }).exec()
+    const election = await this.model.findOne().sort({ startDate: -1 }).exec()
     return election ? extractElection(election) : null
   }
 
   private async getElectionByYearWithVotes(year: number) {
-    const election = await this.model.findOne({ year }).exec()
+    const election = await this.model
+      .findOne({
+        startDate: {
+          $gte: new Date(year, 0, 1),
+          $lt: new Date(year + 1, 0, 1),
+        },
+      })
+      .exec()
     return election ? extractElection(election) : null
   }
 
