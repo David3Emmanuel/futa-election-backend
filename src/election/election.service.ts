@@ -10,6 +10,8 @@ import {
   Election,
   ElectionWithId,
   extractElection,
+  getYear,
+  isActive,
 } from 'src/schemas/election.schema'
 import { ElectionWithoutVotes } from './hideVotes'
 import { hideVotes } from './hideVotes'
@@ -61,14 +63,14 @@ export class ElectionService {
 
   async getActiveElection(): Promise<ElectionWithoutVotes> {
     const latest = await this.getLatestElection()
-    if (latest.active) return latest
+    if (isActive(latest)) return latest
     throw new NotFoundException('There is no active election')
   }
 
   async getActiveElectionSummary() {
     const latest = await this.getLatestElectionWithVotes()
     if (!latest) throw new NotFoundException('No elections found')
-    if (!latest.active)
+    if (!isActive(latest))
       throw new NotFoundException('There is no active election')
     return this.generateElectionSummary(latest)
   }
@@ -220,11 +222,11 @@ export class ElectionService {
     // TODO generate summary for each position
     const summary = {}
     return {
-      active: election.active,
+      active: isActive(election),
       endDate: election.endDate,
       startDate: election.startDate,
       totalVotes: election.votes?.length || 0,
-      year: election.year,
+      year: getYear(election),
       summary,
     }
   }
