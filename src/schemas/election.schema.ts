@@ -1,7 +1,5 @@
 import { Prop, Schema, SchemaFactory, Virtual } from '@nestjs/mongoose'
 import { Document, HydratedDocument, Types } from 'mongoose'
-import { Voter, VoterWithId } from './voter.schema'
-import { Candidate, CandidateWithId } from './candidate.schema'
 import { Vote } from './vote.schema'
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
@@ -16,12 +14,8 @@ export class Election {
   year: number
   // @ApiProperty() @Prop([String]) positions: string[]
   // FIXME ensure only specified positions can be used
-  @ApiProperty()
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })
-  voters: Voter[]
-  @ApiProperty()
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Candidate' }] })
-  candidates: Candidate[]
+  @ApiProperty() @Prop([String]) voterIds: string[]
+  @ApiProperty() @Prop([String]) candidateIds: string[]
   @ApiPropertyOptional() @Prop([Vote]) votes?: Vote[]
   @ApiProperty() @Prop() startDate: Date
   @ApiProperty() @Prop() endDate: Date
@@ -36,10 +30,6 @@ export class Election {
 
 export class ElectionWithId extends Election {
   @ApiProperty() _id: Types.ObjectId
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Voter' }] })
-  voters: VoterWithId[]
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Candidate' }] })
-  candidates: CandidateWithId[]
 }
 
 export function extractElection(

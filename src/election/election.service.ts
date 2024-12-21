@@ -20,8 +20,12 @@ import {
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
-import { Candidate } from 'src/schemas/candidate.schema'
-import { Voter } from 'src/schemas/voter.schema'
+import { BulkAddResponseDTO } from 'src/candidate/candidate.dto'
+
+type ElectionBulkResponseDTO = Partial<{
+  candidates: BulkAddResponseDTO
+  voters: BulkAddResponseDTO
+}>
 
 @Injectable()
 export class ElectionService {
@@ -86,7 +90,10 @@ export class ElectionService {
     end,
     candidates,
     voters,
-  }: CreateElectionDTO): Promise<void> {
+  }: CreateElectionDTO): Promise<{
+    message: string
+    bulk: ElectionBulkResponseDTO
+  }> {
     const currentYear = new Date().getFullYear()
     if (start) {
       // Ensure the start date is between now and end of the year
@@ -123,39 +130,39 @@ export class ElectionService {
       if (!(e instanceof NotFoundException)) throw e
     }
 
-    let new_candidates: Candidate[] | undefined
+    const response: ElectionBulkResponseDTO = {}
+
+    let new_candidates: string[] | undefined
     if (candidates) {
-      const { ids } = await this.candidateService.bulkAddCandidates(candidates)
-      new_candidates = []
-      ids.forEach(async (id) => {
-        const candidate = await this.candidateService.getCandidateById(id)
-        new_candidates!.push(candidate)
-      })
+      response.candidates =
+        await this.candidateService.bulkAddCandidates(candidates)
+      new_candidates = response.candidates.ids
     }
 
-    let new_voters: Voter[] | undefined
+    let new_voters: string[] | undefined
     if (voters) {
-      const { ids } = await this.voterService.bulkAddVoters(voters)
-      new_voters = []
-      ids.forEach(async (id) => {
-        const voter = await this.voterService.getVoterById(id)
-        new_voters!.push(voter)
-      })
+      response.voters = await this.voterService.bulkAddVoters(voters)
+      new_voters = response.voters.ids
     }
 
     const election = new this.model({
-      start,
-      end,
-      candidates: new_candidates,
-      voters: new_voters,
+      startDate: start,
+      endDate: end,
+      candidateIds: new_candidates,
+      voterIds: new_voters,
     })
     await election.save()
+
+    return { message: 'Success', bulk: response }
   }
 
   async updateElectionByYear(
     year: number,
     updateElectionDTO: UpdateElectionDTO,
-  ): Promise<void> {
+  ): Promise<{
+    message: string
+    bulk: ElectionBulkResponseDTO
+  }> {
     const election = await this.getElectionByYear(year)
     let { start, end } = updateElectionDTO
     const { candidates, voters } = updateElectionDTO
@@ -179,32 +186,29 @@ export class ElectionService {
       end = election.endDate
     }
 
-    let new_candidates: Candidate[] | undefined
+    const response: ElectionBulkResponseDTO = {}
+
+    let new_candidates: string[] | undefined
     if (candidates) {
-      const { ids } = await this.candidateService.bulkAddCandidates(candidates)
-      new_candidates = []
-      ids.forEach(async (id) => {
-        const candidate = await this.candidateService.getCandidateById(id)
-        new_candidates!.push(candidate)
-      })
+      response.candidates =
+        await this.candidateService.bulkAddCandidates(candidates)
+      new_candidates = response.candidates.ids
     }
 
-    let new_voters: Voter[] | undefined
+    let new_voters: string[] | undefined
     if (voters) {
-      const { ids } = await this.voterService.bulkAddVoters(voters)
-      new_voters = []
-      ids.forEach(async (id) => {
-        const voter = await this.voterService.getVoterById(id)
-        new_voters!.push(voter)
-      })
+      response.voters = await this.voterService.bulkAddVoters(voters)
+      new_voters = response.voters.ids
     }
 
     await new this.model({
-      start,
-      end,
-      candidates: new_candidates,
-      voters: new_voters,
+      startDate: start,
+      endDate: end,
+      candidateIds: new_candidates,
+      voterIds: new_voters,
     }).save()
+
+    return { message: 'Success', bulk: response }
   }
 
   async endActiveElection(): Promise<void> {
