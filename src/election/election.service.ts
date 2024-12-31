@@ -361,7 +361,6 @@ export class ElectionService {
         {
           email: voter.email,
           data: {
-            name: voter.name,
             link: `http://localhost:3000/vote?token=${token}`,
             endDate: election.endDate.toDateString(),
           },

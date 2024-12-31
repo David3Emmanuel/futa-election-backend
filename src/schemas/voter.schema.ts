@@ -7,7 +7,6 @@ export class Voter {
   @ApiProperty()
   @Prop({ required: true, match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ })
   email: string
-  @ApiProperty() @Prop({ required: true }) name: string
 }
 
 export class VoterWithId extends Voter {

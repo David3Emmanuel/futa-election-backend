@@ -17,10 +17,10 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
   async validate(
     payload: Voter & { iat: number; exp: number },
   ): Promise<VoterWithId> {
-    const { email, name } = payload
+    const { email } = payload
 
-    if (!(email && name)) {
-      console.warn('Detected vote attempt without email/name')
+    if (!email) {
+      console.warn('Detected vote attempt without email')
       throw new UnauthorizedException('Invalid voter token')
     }
 

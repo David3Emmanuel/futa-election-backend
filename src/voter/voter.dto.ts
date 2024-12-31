@@ -13,6 +13,5 @@ export class BulkAddRequestDTO {
 }
 
 export class UpdateVoterDTO {
-  @ApiPropertyOptional() @IsOptional() name?: string
   @ApiPropertyOptional() @IsOptional() @IsEmail() email?: string
 }

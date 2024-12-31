@@ -8,7 +8,6 @@ export class VoteService {
   async generateToken(voter: Voter) {
     return this.jwtService.sign({
       email: voter.email,
-      name: voter.name,
     })
   }
 }
