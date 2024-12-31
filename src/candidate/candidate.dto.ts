@@ -1,5 +1,4 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
-import { Candidate } from 'src/schemas/candidate.schema'
 
 export class BulkAddResponseDTO {
   @ApiProperty() created: number
@@ -7,12 +6,16 @@ export class BulkAddResponseDTO {
   @ApiProperty() ids: string[]
 }
 
+export class CreateCandidateDTO {
+  @ApiProperty() name: string
+  @ApiProperty() currentPosition: string
+}
+
 export class BulkAddRequestDTO {
-  @ApiProperty({ type: [Candidate] }) candidates: Candidate[]
+  @ApiProperty({ type: [CreateCandidateDTO] }) candidates: CreateCandidateDTO[]
 }
 
 export class UpdateCandidateDTO {
   @ApiPropertyOptional() name?: string
   @ApiPropertyOptional() currentPosition?: string
-  @ApiPropertyOptional() imageUrl?: string
 }

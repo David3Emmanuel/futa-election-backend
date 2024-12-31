@@ -10,7 +10,11 @@ import {
   CandidateWithId,
   extractCandidate,
 } from 'src/schemas/candidate.schema'
-import { BulkAddResponseDTO } from './candidate.dto'
+import {
+  BulkAddResponseDTO,
+  CreateCandidateDTO,
+  UpdateCandidateDTO,
+} from './candidate.dto'
 
 @Injectable()
 export class CandidateService {
@@ -36,7 +40,7 @@ export class CandidateService {
     return extractCandidate(candidate)
   }
 
-  async createCandidate(candidate: Candidate): Promise<void> {
+  async createCandidate(candidate: CreateCandidateDTO): Promise<void> {
     try {
       await this.getCandidateByName(candidate.name)
       throw new ConflictException('Candidate already exists')
@@ -52,7 +56,7 @@ export class CandidateService {
     await this.model.findByIdAndDelete(id).exec()
   }
 
-  async updateCandidate(id: string, update: Partial<Candidate>): Promise<void> {
+  async updateCandidate(id: string, update: UpdateCandidateDTO): Promise<void> {
     let candidate = await this.getCandidateById(id)
     candidate = { ...candidate, ...update }
     await this.model.updateOne(
@@ -64,7 +68,7 @@ export class CandidateService {
   }
 
   async bulkAddCandidates(
-    candidates: Candidate[],
+    candidates: CreateCandidateDTO[],
   ): Promise<BulkAddResponseDTO> {
     let created = 0,
       updated = 0

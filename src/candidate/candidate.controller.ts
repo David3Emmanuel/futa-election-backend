@@ -18,8 +18,8 @@ import {
   ApiOkResponse,
   ApiOperation,
 } from '@nestjs/swagger'
-import { Candidate, CandidateWithId } from 'src/schemas/candidate.schema'
-import { UpdateCandidateDTO } from './candidate.dto'
+import { CandidateWithId } from 'src/schemas/candidate.schema'
+import { CreateCandidateDTO, UpdateCandidateDTO } from './candidate.dto'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
 import { BulkAddRequestDTO } from './candidate.dto'
 
@@ -65,7 +65,7 @@ export class CandidateController {
   })
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)
-  createCandidate(@Body() candidate: Candidate) {
+  createCandidate(@Body() candidate: CreateCandidateDTO) {
     return this.candidateService.createCandidate(candidate)
   }
 

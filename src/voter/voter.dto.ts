@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsEmail, IsOptional } from 'class-validator'
 import { Voter } from 'src/schemas/voter.schema'
 
 export class BulkAddResponseDTO {
@@ -12,7 +13,6 @@ export class BulkAddRequestDTO {
 }
 
 export class UpdateVoterDTO {
-  @ApiPropertyOptional() name?: string
-  @ApiPropertyOptional() currentPosition?: string
-  @ApiPropertyOptional() imageUrl?: string
+  @ApiPropertyOptional() @IsOptional() name?: string
+  @ApiPropertyOptional() @IsOptional() @IsEmail() email?: string
 }
