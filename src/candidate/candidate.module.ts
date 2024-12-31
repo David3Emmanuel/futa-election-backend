@@ -4,6 +4,7 @@ import { CandidateController } from './candidate.controller'
 import { MongooseModule } from '@nestjs/mongoose'
 import { Candidate, CandidateSchema } from 'src/schemas/candidate.schema'
 import { NestjsFormDataModule } from 'nestjs-form-data'
+import { CloudinaryModule } from 'src/cloudinary/cloudinary.module'
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { NestjsFormDataModule } from 'nestjs-form-data'
       { name: Candidate.name, schema: CandidateSchema },
     ]),
     NestjsFormDataModule,
+    CloudinaryModule,
   ],
   providers: [CandidateService],
   controllers: [CandidateController],

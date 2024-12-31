@@ -15,10 +15,15 @@ import {
   CreateCandidateDTO,
   UpdateCandidateDTO,
 } from './candidate.dto'
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service'
+import { MemoryStoredFile } from 'nestjs-form-data'
 
 @Injectable()
 export class CandidateService {
-  constructor(@InjectModel(Candidate.name) private model: Model<Candidate>) {}
+  constructor(
+    @InjectModel(Candidate.name) private model: Model<Candidate>,
+    private readonly cloudinaryService: CloudinaryService,
+  ) {}
 
   async getAllCandidates(): Promise<CandidateWithId[]> {
     return (await this.model.find().exec()).map(extractCandidate)
@@ -93,5 +98,26 @@ export class CandidateService {
     )
 
     return { created, updated, ids }
+  }
+
+  async uploadImage(id: string, file: MemoryStoredFile) {
+    const candidate = await this.getCandidateById(id)
+    const result = await this.cloudinaryService.uploadImage(
+      file,
+      candidate._id.toString(),
+      'futa-election',
+    )
+
+    if (!result) throw new Error('Error uploading image')
+    const imageUrl = result.secure_url
+
+    await this.model.updateOne(
+      {
+        _id: candidate._id,
+      },
+      { imageUrl },
+    )
+
+    return { candidateId: id, imageUrl }
   }
 }

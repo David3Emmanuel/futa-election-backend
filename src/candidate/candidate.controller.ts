@@ -12,7 +12,9 @@ import {
 import { CandidateService } from './candidate.service'
 import {
   ApiBearerAuth,
+  ApiBody,
   ApiConflictResponse,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -118,8 +120,12 @@ export class CandidateController {
   }
 
   @Post(':id/upload-image')
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: UploadImageDTO })
   @FormDataRequest()
-  uploadImage(@Param('id') id: string, @Body() body: UploadImageDTO) {
-    console.log({ id, body })
+  async uploadImage(@Param('id') id: string, @Body() body: UploadImageDTO) {
+    return await this.candidateService.uploadImage(id, body.image)
   }
 }

@@ -7,6 +7,7 @@ import { ElectionModule } from './election/election.module'
 import { CandidateModule } from './candidate/candidate.module'
 import { VoterModule } from './voter/voter.module'
 import { VoteModule } from './vote/vote.module'
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { VoteModule } from './vote/vote.module'
     CandidateModule,
     VoterModule,
     VoteModule,
+    CloudinaryModule,
   ],
 })
 export class AppModule {}
