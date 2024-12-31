@@ -34,6 +34,7 @@
     "class-validator": "^0.14.1",
     "mailersend": "^2.3.0",
     "mongoose": "^8.8.2",
+    "nestjs-form-data": "^1.9.92",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.2.0",

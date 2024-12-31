@@ -19,9 +19,14 @@ import {
   ApiOperation,
 } from '@nestjs/swagger'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
-import { CreateCandidateDTO, UpdateCandidateDTO } from './candidate.dto'
+import {
+  CreateCandidateDTO,
+  UpdateCandidateDTO,
+  UploadImageDTO,
+} from './candidate.dto'
 import { JWTAuthGuard } from 'src/auth/jwt-auth.guard'
 import { BulkAddRequestDTO } from './candidate.dto'
+import { FormDataRequest } from 'nestjs-form-data'
 
 @Controller('candidate')
 export class CandidateController {
@@ -110,5 +115,11 @@ export class CandidateController {
   @UseGuards(JWTAuthGuard)
   bulkAddCandidates(@Body() candidatesDto: BulkAddRequestDTO) {
     return this.candidateService.bulkAddCandidates(candidatesDto.candidates)
+  }
+
+  @Post(':id/upload-image')
+  @FormDataRequest()
+  uploadImage(@Param('id') id: string, @Body() body: UploadImageDTO) {
+    console.log({ id, body })
   }
 }

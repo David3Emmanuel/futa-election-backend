@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { IsFile, MemoryStoredFile } from 'nestjs-form-data'
 
 export class BulkAddResponseDTO {
   @ApiProperty() created: number
@@ -18,4 +19,8 @@ export class BulkAddRequestDTO {
 export class UpdateCandidateDTO {
   @ApiPropertyOptional() name?: string
   @ApiPropertyOptional() currentPosition?: string
+}
+
+export class UploadImageDTO {
+  @IsFile() image: MemoryStoredFile
 }
