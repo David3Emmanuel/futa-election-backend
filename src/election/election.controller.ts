@@ -87,6 +87,8 @@ export class ElectionController {
     return this.electionService.getLatestElectionSummary()
   }
 
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
   @Get('send-emails')
   sendEmails() {
     return this.electionService.sendBulkEmails()
