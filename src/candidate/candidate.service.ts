@@ -62,14 +62,8 @@ export class CandidateService {
   }
 
   async updateCandidate(id: string, update: UpdateCandidateDTO): Promise<void> {
-    let candidate = await this.getCandidateById(id)
-    candidate = { ...candidate, ...update }
-    await this.model.updateOne(
-      {
-        _id: candidate._id,
-      },
-      update,
-    )
+    await this.getCandidateById(id)
+    await this.model.findByIdAndUpdate(id, update, { new: true }).exec()
   }
 
   async bulkAddCandidates(
@@ -83,7 +77,10 @@ export class CandidateService {
       candidates.map(async (candidate) => {
         try {
           const existing = await this.getCandidateByName(candidate.name)
-          await this.updateCandidate(existing._id.toString(), candidate)
+          const update = new UpdateCandidateDTO()
+          update.name = candidate.name
+          update.currentPosition = candidate.currentPosition
+          await this.updateCandidate(existing._id.toString(), update)
           updated += 1
           ids.push(existing._id.toString())
         } catch (e) {
@@ -119,5 +116,17 @@ export class CandidateService {
     )
 
     return { candidateId: id, imageUrl }
+  }
+
+  async setPastPosition(
+    candidateId: string,
+    year: number,
+    position: string,
+  ): Promise<void> {
+    const candidate = await this.getCandidateById(candidateId)
+    const pastPositions = candidate.pastPositions || {}
+    pastPositions[year] = position
+
+    await this.model.updateOne({ _id: candidateId }, { pastPositions })
   }
 }

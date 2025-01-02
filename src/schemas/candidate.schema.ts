@@ -7,6 +7,12 @@ export class Candidate {
   @ApiProperty() @Prop({ required: true }) name: string
   @ApiProperty() @Prop({ required: true }) currentPosition: string
   @ApiPropertyOptional() @Prop() imageUrl: string
+  @ApiPropertyOptional({
+    example: { 2024: 'position' },
+    description: 'All positions that this candidate has run for by year',
+  })
+  @Prop({ type: Map, of: String })
+  pastPositions?: Record<number, string>
 }
 
 export class CandidateWithId extends Candidate {

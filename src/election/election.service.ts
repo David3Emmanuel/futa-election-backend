@@ -148,6 +148,17 @@ export class ElectionService {
       response.candidates =
         await this.candidateService.bulkAddCandidates(candidates)
       new_candidates = response.candidates.ids
+
+      // Set past positions for each candidate
+      for (const candidateId of new_candidates) {
+        const candidate =
+          await this.candidateService.getCandidateById(candidateId)
+        await this.candidateService.setPastPosition(
+          candidateId,
+          currentYear,
+          candidate.currentPosition,
+        )
+      }
     }
 
     let new_voters: string[] | undefined
@@ -201,6 +212,17 @@ export class ElectionService {
       response.candidates =
         await this.candidateService.bulkAddCandidates(candidates)
       new_candidates = response.candidates.ids
+
+      // Set past positions for each candidate
+      for (const candidateId of new_candidates) {
+        const candidate =
+          await this.candidateService.getCandidateById(candidateId)
+        await this.candidateService.setPastPosition(
+          candidateId,
+          year,
+          candidate.currentPosition,
+        )
+      }
     }
 
     let new_voters: string[] | undefined
