@@ -45,13 +45,16 @@ export class CandidateService {
     return extractCandidate(candidate)
   }
 
-  async createCandidate(candidate: CreateCandidateDTO): Promise<void> {
+  async createCandidate(
+    candidate: CreateCandidateDTO,
+  ): Promise<CandidateWithId> {
     try {
       await this.getCandidateByName(candidate.name)
       throw new ConflictException('Candidate already exists')
     } catch (e) {
       if (e instanceof NotFoundException) {
-        await new this.model(candidate).save()
+        const { _id } = await new this.model(candidate).save()
+        return this.getCandidateById(_id.toString())
       } else throw e
     }
   }

@@ -62,6 +62,7 @@ export class VoterController {
   })
   @ApiCreatedResponse({
     description: 'Created voterd successfully',
+    type: VoterWithId,
   })
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)

@@ -69,6 +69,7 @@ export class CandidateController {
   })
   @ApiCreatedResponse({
     description: 'Created candidated successfully',
+    type: CandidateWithId,
   })
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)

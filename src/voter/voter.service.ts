@@ -32,13 +32,14 @@ export class VoterService {
     return extractVoter(voter)
   }
 
-  async createVoter(voter: Voter): Promise<void> {
+  async createVoter(voter: Voter): Promise<VoterWithId> {
     try {
       await this.getVoterByEmail(voter.email)
       throw new ConflictException('Voter already exists')
     } catch (e) {
       if (e instanceof NotFoundException) {
-        await new this.model(voter).save()
+        const { _id } = await new this.model(voter).save()
+        return this.getVoterById(_id.toString())
       } else throw e
     }
   }
