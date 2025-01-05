@@ -7,9 +7,9 @@ import { ElectionModule } from './election/election.module'
 import { CandidateModule } from './candidate/candidate.module'
 import { VoterModule } from './voter/voter.module'
 import { VoteModule } from './vote/vote.module'
-import { CloudinaryModule } from './cloudinary/cloudinary.module';
-import { SpreadsheetModule } from './spreadsheet/spreadsheet.module';
-import { SendEmailsModule } from './send-emails/send-emails.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module'
+import { SpreadsheetModule } from './spreadsheet/spreadsheet.module'
+import { SendEmailsModule } from './send-emails/send-emails.module'
 
 @Module({
   imports: [
