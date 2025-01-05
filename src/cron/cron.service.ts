@@ -4,6 +4,14 @@ import {
   MODULE_OPTIONS_TOKEN,
 } from './cron.module-definition'
 import { codes } from './status-codes'
+import {
+  ListJobsResponse,
+  JobDetailsResponse,
+  CreateJobResponse,
+  JobHistoryResponse,
+  JobHistoryDetailsResponse,
+} from './cron.dto'
+import { DetailedJob } from './cron.types'
 
 const BASE_URL = 'https://api.cron-job.org'
 
@@ -16,7 +24,7 @@ export class CronService {
     this.apiKey = options.apiKey
   }
 
-  async fetch(endpoint: string, options: RequestInit = {}) {
+  async fetch<T = unknown>(endpoint: string, options: RequestInit = {}) {
     const response = await fetch(BASE_URL + endpoint, {
       ...options,
       headers: {
@@ -32,6 +40,46 @@ export class CronService {
       throw new Error(`${statusCode}: ${message}`)
     }
 
-    return await response.json()
+    return (await response.json()) as T
+  }
+
+  async listJobs() {
+    return await this.fetch<ListJobsResponse>('/jobs')
+  }
+
+  async getJobDetails(jobId: string) {
+    return await this.fetch<JobDetailsResponse>(`/jobs/${jobId}`)
+  }
+
+  async createJob(job: DetailedJob) {
+    return await this.fetch<CreateJobResponse>('/jobs', {
+      method: 'PUT',
+      body: JSON.stringify({ job }),
+    })
+  }
+
+  async updateJob(jobId: string, job: Partial<DetailedJob>) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    return await this.fetch<{}>(`/jobs/${jobId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ job }),
+    })
+  }
+
+  async deleteJob(jobId: string) {
+    // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+    return await this.fetch<{}>(`/jobs/${jobId}`, {
+      method: 'DELETE',
+    })
+  }
+
+  async getJobHistory(jobId: string) {
+    return await this.fetch<JobHistoryResponse>(`/jobs/${jobId}/history`)
+  }
+
+  async getJobHistoryDetails(jobId: string, identifier: string) {
+    return await this.fetch<JobHistoryDetailsResponse>(
+      `/jobs/${jobId}/history/${identifier}`,
+    )
   }
 }
