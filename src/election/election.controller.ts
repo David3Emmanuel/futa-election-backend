@@ -89,9 +89,16 @@ export class ElectionController {
 
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)
-  @Get('send-emails')
-  sendEmails() {
-    return this.electionService.sendBulkEmails()
+  @Get('send-reminder-emails')
+  sendReminderEmails() {
+    return this.electionService.sendBulkReminderEmails()
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @Get('send-other-emails')
+  sendOtherEmails() {
+    return this.electionService.sendPreOrPostElectionEmails()
   }
 
   @Get(':year')
