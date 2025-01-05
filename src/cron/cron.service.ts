@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common'
-import { MODULE_OPTIONS_TOKEN } from './cron.module-definition'
-import { CronModuleOptions } from './cron.types'
+import {
+  CronModuleOptions,
+  MODULE_OPTIONS_TOKEN,
+} from './cron.module-definition'
 import { codes } from './status-codes'
 
 const BASE_URL = 'https://api.cron-job.org'
