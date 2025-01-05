@@ -9,6 +9,7 @@ import { VoterModule } from './voter/voter.module'
 import { VoteModule } from './vote/vote.module'
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { SpreadsheetModule } from './spreadsheet/spreadsheet.module';
+import { SendEmailsModule } from './send-emails/send-emails.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SpreadsheetModule } from './spreadsheet/spreadsheet.module';
     VoteModule,
     CloudinaryModule,
     SpreadsheetModule,
+    SendEmailsModule,
   ],
 })
 export class AppModule {}

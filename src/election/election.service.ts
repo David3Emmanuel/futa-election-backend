@@ -25,8 +25,6 @@ import {
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
-import { EmailService } from 'src/email/email.service'
-import { VoteService } from 'src/vote/vote.service'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
 
 @Injectable()
@@ -35,8 +33,6 @@ export class ElectionService {
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
     private readonly voterService: VoterService,
-    private readonly voteService: VoteService,
-    private readonly emailService: EmailService,
   ) {}
 
   private async getLatestElectionWithVotes() {
@@ -363,90 +359,5 @@ export class ElectionService {
     await this.model.updateOne({ _id: election._id }, { votes: election.votes })
 
     return { message: 'Vote cast successfully', voterId, candidateId }
-  }
-
-  async sendBulkReminderEmails() {
-    const election = await this.getLatestElectionWithVotes()
-    if (!election) throw new NotFoundException('No elections found')
-    if (!isActive(election))
-      throw new NotFoundException('There is no active election')
-
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
-
-      const subject = 'Vote in the upcoming election'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        '0r83ql3kzkv4zw1j',
-        {
-          email: voter.email,
-          data: {
-            link: `http://localhost:3000/vote?token=${token}`,
-            endDate: election.endDate.toDateString(),
-          },
-        },
-      )
-    })
-  }
-
-  async sendBulkPreElectionEmails(election: ElectionWithId) {
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
-
-      const subject = 'Vote in the upcoming election. Starts within an hour'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        '0r83ql3kzkv4zw1j',
-        {
-          email: voter.email,
-          data: {
-            link: `http://localhost:3000/vote?token=${token}`,
-            startDate: election.startDate.toDateString(),
-          },
-        },
-      )
-    })
-  }
-
-  async sendBulkPostElectionEmails(election: ElectionWithId) {
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
-
-      const subject = 'Election results are out. Check them out'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        '0r83ql3kzkv4zw1j',
-        {
-          email: voter.email,
-          data: {
-            link: `http://localhost:3000/vote?token=${token}`,
-            endDate: election.endDate.toDateString(),
-          },
-        },
-      )
-    })
-  }
-
-  async sendPreOrPostElectionEmails() {
-    const election = await this.getLatestElectionWithVotes()
-    if (!election) throw new NotFoundException('No elections found')
-    if (isActive(election))
-      throw new NotFoundException('Election is still active')
-
-    const now = new Date()
-    const timeDiff = election.startDate.getTime() - now.getTime()
-    if (timeDiff < 0 || timeDiff > 3600 * 1000) {
-      // Send pre-election emails
-      await this.sendBulkPreElectionEmails(election)
-    } else {
-      // Send post-election emails
-      await this.sendBulkPostElectionEmails(election)
-    }
   }
 }

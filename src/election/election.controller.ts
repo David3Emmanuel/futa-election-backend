@@ -87,20 +87,6 @@ export class ElectionController {
     return this.electionService.getLatestElectionSummary()
   }
 
-  @ApiBearerAuth()
-  @UseGuards(JWTAuthGuard)
-  @Get('send-reminder-emails')
-  sendReminderEmails() {
-    return this.electionService.sendBulkReminderEmails()
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JWTAuthGuard)
-  @Get('send-other-emails')
-  sendOtherEmails() {
-    return this.electionService.sendPreOrPostElectionEmails()
-  }
-
   @Get(':year')
   @ApiOkResponse({
     description: 'Get election by year',

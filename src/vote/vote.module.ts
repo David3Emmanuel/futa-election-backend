@@ -1,4 +1,4 @@
-import { forwardRef, Module } from '@nestjs/common'
+import { Module } from '@nestjs/common'
 import { VoteController } from './vote.controller'
 import { VoteService } from './vote.service'
 import { EmailModule } from 'src/email/email.module'
@@ -25,7 +25,7 @@ import { ElectionModule } from 'src/election/election.module'
         signOptions: { expiresIn: '1d' },
       }),
     }),
-    forwardRef(() => ElectionModule),
+    ElectionModule,
     VoterModule,
   ],
   controllers: [VoteController],
