@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty, PartialType, PickType } from '@nestjs/swagger'
 import { Job, DetailedJob, HistoryItem } from './cron.types'
 import { IsArray, IsBoolean, IsInt } from 'class-validator'
 
@@ -62,3 +62,13 @@ export class JobHistoryDetailsResponse {
   })
   jobHistoryDetails: HistoryItem
 }
+
+export class UpdateJobRequest extends PartialType(DetailedJob) {}
+
+export class CreateJobRequest extends PickType(DetailedJob, [
+  'title',
+  'url',
+  'enabled',
+  'saveResponses',
+  'schedule',
+]) {}
