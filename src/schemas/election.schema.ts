@@ -18,8 +18,10 @@ export class Election {
   @ApiProperty() @Prop([String]) voterIds: string[]
   @ApiProperty() @Prop([String]) candidateIds: string[]
   @ApiPropertyOptional() @Prop([Vote]) votes?: Vote[]
-  @ApiProperty() @Prop() startDate: Date
-  @ApiProperty() @Prop() endDate: Date
+  @ApiProperty() @Prop({ required: true }) startDate: Date
+  @ApiProperty() @Prop({ required: true }) endDate: Date
+  @ApiProperty() @Prop() startJobId?: number
+  @ApiPropertyOptional() @Prop() endJobId?: number
 }
 
 export class ElectionWithId extends Election {

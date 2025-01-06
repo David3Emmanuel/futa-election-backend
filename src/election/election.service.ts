@@ -26,6 +26,7 @@ import {
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
+import { CronService } from 'src/cron/cron.service'
 
 @Injectable()
 export class ElectionService {
@@ -33,6 +34,7 @@ export class ElectionService {
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
     private readonly voterService: VoterService,
+    private readonly cronService: CronService,
   ) {}
 
   private async getLatestElectionWithVotes() {
@@ -97,10 +99,7 @@ export class ElectionService {
     end,
     candidates,
     voters,
-  }: CreateElectionDTO): Promise<{
-    message: string
-    bulk: CreateElectionResponse
-  }> {
+  }: CreateElectionDTO): Promise<CreateElectionResponse> {
     const currentYear = new Date().getFullYear()
     if (start) {
       // Ensure the start date is between now and end of the year
@@ -171,7 +170,11 @@ export class ElectionService {
     })
     await election.save()
 
-    return { message: 'Success', bulk: response }
+    const extracted = extractElection(election)
+    response.jobStatus = await this.createElectionJobs(extracted)
+
+    response.message = 'Success'
+    return response
   }
 
   async updateElectionByYear(
@@ -227,13 +230,19 @@ export class ElectionService {
       new_voters = response.voters.ids
     }
 
-    await this.model.findByIdAndUpdate(election._id, {
+    const updatedElection = await this.model.findByIdAndUpdate(election._id, {
       startDate: start,
       endDate: end,
       candidateIds: new_candidates,
       voterIds: new_voters,
     })
 
+    if (updatedElection) {
+      const extracted = extractElection(updatedElection)
+      response.jobStatus = await this.createElectionJobs(extracted)
+    }
+
+    response.message = 'Success'
     return response
   }
 
@@ -359,5 +368,61 @@ export class ElectionService {
     await this.model.updateOne({ _id: election._id }, { votes: election.votes })
 
     return { message: 'Vote cast successfully', voterId, candidateId }
+  }
+
+  async createStartJob(election: ElectionWithId) {
+    // Overwrite the start job if it exists
+    if (election.startJobId) {
+      await this.cronService.deleteJob(election.startJobId)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const job = await this.cronService.createJob({
+        enabled: true,
+        title: `Start ${getYear(election)} Election`,
+        schedule: this.cronService.dateToSchedule(election.startDate),
+        saveResponses: true,
+        url: '/send-emails/pre-post',
+      })
+      await this.model.findByIdAndUpdate(election._id, {
+        startJobId: job.jobId,
+      })
+    }
+  }
+
+  async createEndJob(election: ElectionWithId) {
+    // Overwrite the end job if it exists
+    if (election.endJobId) {
+      await this.cronService.deleteJob(election.endJobId)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const job = await this.cronService.createJob({
+        enabled: true,
+        title: `End ${getYear(election)} Election`,
+        schedule: this.cronService.dateToSchedule(election.endDate),
+        saveResponses: true,
+        url: '/send-emails/pre-post',
+      })
+      await this.model.findByIdAndUpdate(election._id, { endJobId: job.jobId })
+    }
+  }
+
+  async createElectionJobs(
+    election: ElectionWithId,
+  ): Promise<CreateElectionResponse['jobStatus']> {
+    const results = await Promise.all([
+      new Promise((resolve: (value: 'Success' | 'Failed') => void) => {
+        this.createStartJob(election)
+          .then(() => resolve('Success'))
+          .catch(() => resolve('Failed'))
+      }),
+      new Promise((resolve: (value: 'Success' | 'Failed') => void) => {
+        this.createEndJob(election)
+          .then(() => resolve('Success'))
+          .catch(() => resolve('Failed'))
+      }),
+    ])
+
+    return {
+      start: results[0],
+      end: results[1],
+    }
   }
 }

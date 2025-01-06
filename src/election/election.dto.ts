@@ -109,4 +109,8 @@ export class CreateElectionResponse {
   message: 'Success'
   candidates?: BulkAddResponseDTO
   voters?: BulkAddResponseDTO
+  jobStatus: {
+    start: 'Success' | 'Failed'
+    end: 'Success' | 'Failed'
+  }
 }
