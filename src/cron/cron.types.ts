@@ -40,6 +40,41 @@ export enum RequestMethod {
   PATCH = 8,
 }
 
+export class JobSchedule {
+  @ApiProperty({ description: 'Schedule time zone' })
+  @IsString()
+  timezone: string
+
+  @ApiProperty({ description: 'Expiration time (format: YYYYMMDDhhmmss)' })
+  @IsInt()
+  expiresAt: number
+
+  @ApiProperty({ description: 'Execution hours', type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  hours: number[]
+
+  @ApiProperty({ description: 'Execution days of month', type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  mdays: number[]
+
+  @ApiProperty({ description: 'Execution minutes', type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  minutes: number[]
+
+  @ApiProperty({ description: 'Execution months', type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  months: number[]
+
+  @ApiProperty({ description: 'Execution days of week', type: [Number] })
+  @IsArray()
+  @IsInt({ each: true })
+  wdays: number[]
+}
+
 export class Job {
   @ApiProperty({ description: 'Job identifier' })
   @IsInt()
@@ -107,32 +142,6 @@ export class Job {
   requestMethod: RequestMethod
 }
 
-export class DetailedJob extends Job {
-  @ApiProperty({
-    description: 'HTTP authentication settings',
-    type: () => JobAuth,
-  })
-  @ValidateNested()
-  @Type(() => JobAuth)
-  auth: JobAuth
-
-  @ApiProperty({
-    description: 'Notification settings',
-    type: () => JobNotificationSettings,
-  })
-  @ValidateNested()
-  @Type(() => JobNotificationSettings)
-  notification: JobNotificationSettings
-
-  @ApiProperty({
-    description: 'Extended request data',
-    type: () => JobExtendedData,
-  })
-  @ValidateNested()
-  @Type(() => JobExtendedData)
-  extendedData: JobExtendedData
-}
-
 export class JobAuth {
   @ApiProperty({ description: 'Enable HTTP basic authentication' })
   @IsBoolean()
@@ -171,39 +180,71 @@ export class JobExtendedData {
   body: string
 }
 
-export class JobSchedule {
-  @ApiProperty({ description: 'Schedule time zone' })
-  @IsString()
-  timezone: string
+export class DetailedJob extends Job {
+  @ApiProperty({
+    description: 'HTTP authentication settings',
+    type: () => JobAuth,
+  })
+  @ValidateNested()
+  @Type(() => JobAuth)
+  auth: JobAuth
 
-  @ApiProperty({ description: 'Expiration time (format: YYYYMMDDhhmmss)' })
+  @ApiProperty({
+    description: 'Notification settings',
+    type: () => JobNotificationSettings,
+  })
+  @ValidateNested()
+  @Type(() => JobNotificationSettings)
+  notification: JobNotificationSettings
+
+  @ApiProperty({
+    description: 'Extended request data',
+    type: () => JobExtendedData,
+  })
+  @ValidateNested()
+  @Type(() => JobExtendedData)
+  extendedData: JobExtendedData
+}
+
+export class HistoryItemStats {
+  @ApiProperty({
+    description:
+      'Time from transfer start until name lookups completed (in microseconds)',
+  })
   @IsInt()
-  expiresAt: number
+  nameLookup: number
 
-  @ApiProperty({ description: 'Execution hours', type: [Number] })
-  @IsArray()
-  @IsInt({ each: true })
-  hours: number[]
+  @ApiProperty({
+    description:
+      'Time from transfer start until socket connect completed (in microseconds)',
+  })
+  @IsInt()
+  connect: number
 
-  @ApiProperty({ description: 'Execution days of month', type: [Number] })
-  @IsArray()
-  @IsInt({ each: true })
-  mdays: number[]
+  @ApiProperty({
+    description:
+      'Time from transfer start until SSL handshake completed (in microseconds) - 0 if not using SSL',
+  })
+  @IsInt()
+  appConnect: number
 
-  @ApiProperty({ description: 'Execution minutes', type: [Number] })
-  @IsArray()
-  @IsInt({ each: true })
-  minutes: number[]
+  @ApiProperty({
+    description:
+      'Time from transfer start until beginning of data transfer (in microseconds)',
+  })
+  @IsInt()
+  preTransfer: number
 
-  @ApiProperty({ description: 'Execution months', type: [Number] })
-  @IsArray()
-  @IsInt({ each: true })
-  months: number[]
+  @ApiProperty({
+    description:
+      'Time from transfer start until the first response byte is received (in microseconds)',
+  })
+  @IsInt()
+  startTransfer: number
 
-  @ApiProperty({ description: 'Execution days of week', type: [Number] })
-  @IsArray()
-  @IsInt({ each: true })
-  wdays: number[]
+  @ApiProperty({ description: 'Total transfer time (in microseconds)' })
+  @IsInt()
+  total: number
 }
 
 export class HistoryItem {
@@ -275,45 +316,4 @@ export class HistoryItem {
   @ValidateNested()
   @Type(() => HistoryItemStats)
   stats: HistoryItemStats
-}
-
-export class HistoryItemStats {
-  @ApiProperty({
-    description:
-      'Time from transfer start until name lookups completed (in microseconds)',
-  })
-  @IsInt()
-  nameLookup: number
-
-  @ApiProperty({
-    description:
-      'Time from transfer start until socket connect completed (in microseconds)',
-  })
-  @IsInt()
-  connect: number
-
-  @ApiProperty({
-    description:
-      'Time from transfer start until SSL handshake completed (in microseconds) - 0 if not using SSL',
-  })
-  @IsInt()
-  appConnect: number
-
-  @ApiProperty({
-    description:
-      'Time from transfer start until beginning of data transfer (in microseconds)',
-  })
-  @IsInt()
-  preTransfer: number
-
-  @ApiProperty({
-    description:
-      'Time from transfer start until the first response byte is received (in microseconds)',
-  })
-  @IsInt()
-  startTransfer: number
-
-  @ApiProperty({ description: 'Total transfer time (in microseconds)' })
-  @IsInt()
-  total: number
 }

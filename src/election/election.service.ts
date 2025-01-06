@@ -227,12 +227,12 @@ export class ElectionService {
       new_voters = response.voters.ids
     }
 
-    await new this.model({
+    await this.model.findByIdAndUpdate(election._id, {
       startDate: start,
       endDate: end,
       candidateIds: new_candidates,
       voterIds: new_voters,
-    }).save()
+    })
 
     return response
   }
