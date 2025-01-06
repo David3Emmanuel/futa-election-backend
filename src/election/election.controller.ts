@@ -187,26 +187,28 @@ export class ElectionController {
 
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)
-  @Patch(':year/remove-people')
+  @Patch('remove-people')
   @ApiOperation({
-    summary: 'Delete candidates or voters by year',
-    description: 'Delete candidates or voters from an election by year',
+    summary: 'Delete candidates or voters from the latest election',
+    description:
+      'Delete candidates or voters from the latest election if it is not active',
   })
   @ApiOkResponse({
     description: 'Candidates or voters deleted successfully',
   })
   @ApiNotFoundResponse({
-    description: 'Election not found for the given year',
+    description: 'No elections found',
+  })
+  @ApiConflictResponse({
+    description: 'Election already started',
   })
   @ApiUnauthorizedResponse({
     description: 'Unauthorized',
   })
-  deleteCandidatesOrVotersByYear(
-    @Param('year') year: number,
+  deleteCandidatesOrVoters(
     @Body() deleteCandidatesOrVotersDTO: DeleteCandidatesOrVotersDTO,
   ) {
-    return this.electionService.deleteCandidatesOrVotersByYear(
-      year,
+    return this.electionService.deleteCandidatesOrVoters(
       deleteCandidatesOrVotersDTO,
     )
   }

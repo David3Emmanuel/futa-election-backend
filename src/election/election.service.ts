@@ -253,13 +253,16 @@ export class ElectionService {
     await this.model.updateOne({ _id: active._id }, { endDate: new Date() })
   }
 
-  async deleteCandidatesOrVotersByYear(
-    year: number,
-    { candidateIds, voterIds }: DeleteCandidatesOrVotersDTO,
-  ) {
-    const election = await this.getElectionByYearWithVotes(year)
-    if (!election)
-      throw new NotFoundException('Election not found for the given year')
+  async deleteCandidatesOrVoters({
+    candidateIds,
+    voterIds,
+  }: DeleteCandidatesOrVotersDTO) {
+    const election = await this.getLatestElection()
+    if (!election) throw new NotFoundException('No elections found')
+    if (new Date() > election.startDate)
+      throw new ConflictException(
+        'Cannot delete candidates or voters from an already started election',
+      )
 
     if (candidateIds) {
       election.candidateIds = election.candidateIds.filter(
