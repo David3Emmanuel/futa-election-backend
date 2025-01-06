@@ -25,6 +25,7 @@ import {
   ElectionSummary,
   UpdateElectionDTO,
   CreateElectionResponse,
+  DeleteCandidatesOrVotersDTO,
 } from './election.dto'
 
 @Controller('election')
@@ -182,5 +183,31 @@ export class ElectionController {
     @Body() updateElectionDTO: UpdateElectionDTO,
   ) {
     return this.electionService.updateElectionByYear(year, updateElectionDTO)
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @Patch(':year/remove-people')
+  @ApiOperation({
+    summary: 'Delete candidates or voters by year',
+    description: 'Delete candidates or voters from an election by year',
+  })
+  @ApiOkResponse({
+    description: 'Candidates or voters deleted successfully',
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  deleteCandidatesOrVotersByYear(
+    @Param('year') year: number,
+    @Body() deleteCandidatesOrVotersDTO: DeleteCandidatesOrVotersDTO,
+  ) {
+    return this.electionService.deleteCandidatesOrVotersByYear(
+      year,
+      deleteCandidatesOrVotersDTO,
+    )
   }
 }

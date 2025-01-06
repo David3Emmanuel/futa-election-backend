@@ -22,6 +22,7 @@ import {
   ElectionSummary,
   PositionSummary,
   UpdateElectionDTO,
+  DeleteCandidatesOrVotersDTO,
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
@@ -250,6 +251,34 @@ export class ElectionService {
     const active = await this.getActiveElection()
     if (!active) throw new NotFoundException('There is no active election')
     await this.model.updateOne({ _id: active._id }, { endDate: new Date() })
+  }
+
+  async deleteCandidatesOrVotersByYear(
+    year: number,
+    { candidateIds, voterIds }: DeleteCandidatesOrVotersDTO,
+  ) {
+    const election = await this.getElectionByYearWithVotes(year)
+    if (!election)
+      throw new NotFoundException('Election not found for the given year')
+
+    if (candidateIds) {
+      election.candidateIds = election.candidateIds.filter(
+        (id) => !candidateIds.includes(id),
+      )
+    }
+
+    if (voterIds) {
+      election.voterIds = election.voterIds.filter(
+        (id) => !voterIds.includes(id),
+      )
+    }
+
+    await this.model.findByIdAndUpdate(election._id, {
+      candidateIds: election.candidateIds,
+      voterIds: election.voterIds,
+    })
+
+    return { message: 'Candidates or voters deleted successfully' }
   }
 
   private async generateElectionSummary(

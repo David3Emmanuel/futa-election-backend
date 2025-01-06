@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger'
-import { IsDate, IsOptional } from 'class-validator'
+import { IsDate, IsOptional, IsArray, IsMongoId } from 'class-validator'
 import {
   BulkAddResponseDTO,
   CreateCandidateDTO,
@@ -68,6 +68,26 @@ export class UpdateElectionDTO {
   })
   @IsOptional()
   voters?: Voter[]
+}
+
+export class DeleteCandidatesOrVotersDTO {
+  @ApiProperty({
+    description: 'List of candidate IDs to delete',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  candidateIds?: string[]
+
+  @ApiProperty({
+    description: 'List of voter IDs to delete',
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  voterIds?: string[]
 }
 
 class CandidatePollResult {
