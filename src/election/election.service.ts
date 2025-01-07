@@ -405,7 +405,13 @@ export class ElectionService {
   async createStartJob(election: ElectionWithId) {
     // Overwrite the start job if it exists
     if (election.startJobId) {
-      await this.cronService.deleteJob(election.startJobId)
+      try {
+        await this.cronService.deleteJob(election.startJobId)
+      } catch (e) {
+        if (e instanceof HttpException)
+          console.log(`Failed to delete job ${election.startJobId}`)
+        else throw e
+      }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const job = await this.cronService.createJob({
         enabled: true,
@@ -423,7 +429,13 @@ export class ElectionService {
   async createEndJob(election: ElectionWithId) {
     // Overwrite the end job if it exists
     if (election.endJobId) {
-      await this.cronService.deleteJob(election.endJobId)
+      try {
+        await this.cronService.deleteJob(election.endJobId)
+      } catch (e) {
+        if (e instanceof HttpException)
+          console.log(`Failed to delete job ${election.endJobId}`)
+        else throw e
+      }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const job = await this.cronService.createJob({
         enabled: true,
