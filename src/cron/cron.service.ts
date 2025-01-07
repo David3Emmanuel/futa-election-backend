@@ -94,7 +94,7 @@ export class CronService {
       expiryDate
         .toISOString()
         .replace(/[^0-9]/g, '')
-        .slice(0, 12),
+        .slice(0, 14),
     )
 
     return {
