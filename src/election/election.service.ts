@@ -265,7 +265,7 @@ export class ElectionService {
   async endActiveElection(): Promise<void> {
     const active = await this.getActiveElection()
     if (!active) throw new NotFoundException('There is no active election')
-    await this.model.updateOne({ _id: active._id }, { endDate: new Date() })
+    await this.model.findByIdAndUpdate(active._id, { endDate: new Date() })
   }
 
   async deleteCandidatesOrVoters({
@@ -412,7 +412,7 @@ export class ElectionService {
     }
 
     election.votes.push({ voterId, candidateId })
-    await this.model.updateOne({ _id: election._id }, { votes: election.votes })
+    await this.model.findByIdAndUpdate(election._id, { votes: election.votes })
 
     return { message: 'Vote cast successfully', voterId, candidateId }
   }
@@ -468,6 +468,7 @@ export class ElectionService {
     newDates: { start: Date; end: Date },
   ): Promise<CreateElectionResponse['jobStatus']> {
     // TODO create reminders
+    // FIXME do not create job unless date actually changes
     const startJobStatus = await new Promise<'Success' | 'Failed'>(
       (resolve) => {
         this.createStartOrEndJob(election, newDates.start, 'Start')
