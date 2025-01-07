@@ -495,4 +495,15 @@ export class ElectionService {
       end: endJobStatus,
     }
   }
+
+  async getCandidatesByYear(year: number): Promise<CandidateWithId[]> {
+    const election = await this.getElectionByYear(year)
+    if (!election)
+      throw new NotFoundException('Election not found for the given year')
+    return Promise.all(
+      election.candidateIds.map((id) =>
+        this.candidateService.getCandidateById(id),
+      ),
+    )
+  }
 }

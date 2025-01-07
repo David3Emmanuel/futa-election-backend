@@ -27,6 +27,7 @@ import {
   CreateElectionResponse,
   DeleteCandidatesOrVotersDTO,
 } from './election.dto'
+import { CandidateWithId } from 'src/schemas/candidate.schema'
 
 @Controller('election')
 export class ElectionController {
@@ -114,6 +115,23 @@ export class ElectionController {
   })
   async getElectionSummaryByYear(@Param('year') year: number) {
     return this.electionService.getElectionSummaryByYear(year)
+  }
+
+  @Get(':year/candidates')
+  @ApiOkResponse({
+    description: 'Get all candidates for a particular year',
+    type: [CandidateWithId],
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiOperation({
+    summary: 'Get all candidates for a particular year',
+  })
+  async getCandidatesByYear(
+    @Param('year') year: number,
+  ): Promise<CandidateWithId[]> {
+    return this.electionService.getCandidatesByYear(year)
   }
 
   @ApiBearerAuth()
