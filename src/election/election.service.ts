@@ -435,6 +435,16 @@ export class ElectionService {
       }
     }
 
+    // Adjust the new date
+    // Shift it to an hour before/after the current date
+    newDate = new Date(
+      newDate.getTime() + (type === 'Start' ? -60 : 1) * 60 * 1000,
+    )
+    // If the date is in the past, set it to 2 minutes from now
+    if (newDate < new Date()) {
+      newDate = new Date(new Date().getTime() + 2 * 60 * 1000)
+    }
+
     const job = await this.cronService.createJob({
       enabled: true,
       title: `${type} ${getYear(election)} Election`,
