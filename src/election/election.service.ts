@@ -34,6 +34,7 @@ import { ConfigService } from '@nestjs/config'
 @Injectable()
 export class ElectionService {
   private readonly backendUrl: string
+  private readonly adminToken: string
 
   constructor(
     @InjectModel(Election.name) private model: Model<Election>,
@@ -43,6 +44,7 @@ export class ElectionService {
     private readonly configService: ConfigService,
   ) {
     this.backendUrl = this.configService.getOrThrow<string>('BACKEND_URL')
+    this.adminToken = this.configService.getOrThrow<string>('ADMIN_TOKEN')
   }
 
   private async getLatestElectionWithVotes() {
@@ -439,6 +441,11 @@ export class ElectionService {
       schedule: this.cronService.dateToSchedule(newDate),
       saveResponses: true,
       url: `${this.backendUrl}/send-emails/pre-post`,
+      extendedData: {
+        headers: {
+          Authorization: `Bearer ${this.adminToken}`,
+        },
+      },
     })
 
     const update =

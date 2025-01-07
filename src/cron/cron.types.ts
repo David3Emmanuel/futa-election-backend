@@ -171,13 +171,15 @@ export class JobNotificationSettings {
 }
 
 export class JobExtendedData {
-  @ApiProperty({ description: 'Request headers', type: Object })
+  @ApiProperty({ description: 'Request headers', type: Object, nullable: true })
+  @IsOptional()
   @IsObject()
-  headers: Record<string, string>
+  headers?: Record<string, string>
 
-  @ApiProperty({ description: 'Request body data' })
+  @ApiProperty({ description: 'Request body data', nullable: true })
+  @IsOptional()
   @IsString()
-  body: string
+  body?: string
 }
 
 export class DetailedJob extends Job {
@@ -200,10 +202,12 @@ export class DetailedJob extends Job {
   @ApiProperty({
     description: 'Extended request data',
     type: () => JobExtendedData,
+    nullable: true,
   })
+  @IsOptional()
   @ValidateNested()
   @Type(() => JobExtendedData)
-  extendedData: JobExtendedData
+  extendedData?: JobExtendedData
 }
 
 export class HistoryItemStats {

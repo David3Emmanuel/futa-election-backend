@@ -71,4 +71,5 @@ export class CreateJobRequest extends PickType(DetailedJob, [
   'enabled',
   'saveResponses',
   'schedule',
+  'extendedData',
 ]) {}
