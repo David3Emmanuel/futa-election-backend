@@ -409,50 +409,35 @@ export class ElectionService {
     return { message: 'Vote cast successfully', voterId, candidateId }
   }
 
-  async createStartJob(election: ElectionWithId, newDate: Date) {
-    // Overwrite the start job if it exists
-    if (election.startJobId) {
+  private async createStartOrEndJob(
+    election: ElectionWithId,
+    newDate: Date,
+    type: 'Start' | 'End',
+  ) {
+    // Overwrite the job if it exists
+    const previousJobId =
+      type === 'Start' ? election.startJobId : election.endJobId
+    if (previousJobId) {
       try {
-        await this.cronService.deleteJob(election.startJobId)
+        await this.cronService.deleteJob(previousJobId)
       } catch (e) {
         if (e instanceof HttpException)
-          console.log(`Failed to delete job ${election.startJobId}`)
+          console.log(`Failed to delete job ${previousJobId}`)
         else throw e
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const job = await this.cronService.createJob({
-        enabled: true,
-        title: `Start ${getYear(election)} Election`,
-        schedule: this.cronService.dateToSchedule(newDate),
-        saveResponses: true,
-        url: '/send-emails/pre-post',
-      })
-      await this.model.findByIdAndUpdate(election._id, {
-        startJobId: job.jobId,
-      })
     }
-  }
 
-  async createEndJob(election: ElectionWithId, newDate: Date) {
-    // Overwrite the end job if it exists
-    if (election.endJobId) {
-      try {
-        await this.cronService.deleteJob(election.endJobId)
-      } catch (e) {
-        if (e instanceof HttpException)
-          console.log(`Failed to delete job ${election.endJobId}`)
-        else throw e
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const job = await this.cronService.createJob({
-        enabled: true,
-        title: `End ${getYear(election)} Election`,
-        schedule: this.cronService.dateToSchedule(newDate),
-        saveResponses: true,
-        url: '/send-emails/pre-post',
-      })
-      await this.model.findByIdAndUpdate(election._id, { endJobId: job.jobId })
-    }
+    const job = await this.cronService.createJob({
+      enabled: true,
+      title: `${type} ${getYear(election)} Election`,
+      schedule: this.cronService.dateToSchedule(newDate),
+      saveResponses: true,
+      url: '/send-emails/pre-post',
+    })
+
+    const update =
+      type === 'Start' ? { startJobId: job.jobId } : { endJobId: job.jobId }
+    await this.model.findByIdAndUpdate(election._id, update)
   }
 
   async createElectionJobs(
@@ -461,7 +446,7 @@ export class ElectionService {
   ): Promise<CreateElectionResponse['jobStatus']> {
     const startJobStatus = await new Promise<'Success' | 'Failed'>(
       (resolve) => {
-        this.createStartJob(election, newDates.start)
+        this.createStartOrEndJob(election, newDates.start, 'Start')
           .then(() => resolve('Success'))
           .catch((e) => {
             console.error(e)
@@ -473,7 +458,7 @@ export class ElectionService {
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const endJobStatus = await new Promise<'Success' | 'Failed'>((resolve) => {
-      this.createEndJob(election, newDates.end)
+      this.createStartOrEndJob(election, newDates.end, 'End')
         .then(() => resolve('Success'))
         .catch((e) => {
           console.error(e)
