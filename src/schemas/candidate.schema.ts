@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose'
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional, OmitType } from '@nestjs/swagger'
 import { Document, HydratedDocument, Types } from 'mongoose'
+import { mapToObjectWithNumberKeys } from 'src/util'
 
 @Schema()
 export class Candidate {
@@ -12,17 +13,25 @@ export class Candidate {
     description: 'All positions that this candidate has run for by year',
   })
   @Prop({ type: Map, of: String })
-  pastPositions?: Record<number, string>
+  pastPositions?: Map<string, string>
 }
 
-export class CandidateWithId extends Candidate {
+export class ProcessedCandidate extends OmitType(Candidate, ['pastPositions']) {
+  pastPositions: Record<number, string>
+}
+
+export class CandidateWithId extends ProcessedCandidate {
   _id: Types.ObjectId
 }
 
 export function extractCandidate(
   candidateDocument: Document<unknown, object, Candidate>,
-) {
-  return candidateDocument.toObject({ versionKey: false })
+): CandidateWithId {
+  const rawCandidate = candidateDocument.toObject({ versionKey: false })
+  const pastPositions = mapToObjectWithNumberKeys(
+    rawCandidate.pastPositions || new Map(),
+  )
+  return { ...rawCandidate, pastPositions }
 }
 
 export const CandidateSchema = SchemaFactory.createForClass(Candidate)

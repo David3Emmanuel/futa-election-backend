@@ -17,6 +17,7 @@ import {
 } from './candidate.dto'
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service'
 import { MemoryStoredFile } from 'nestjs-form-data'
+import { objectWithNumberKeysToMap } from 'src/util'
 
 @Injectable()
 export class CandidateService {
@@ -130,6 +131,8 @@ export class CandidateService {
     const pastPositions = candidate.pastPositions || {}
     pastPositions[year] = position
 
-    await this.model.updateOne({ _id: candidateId }, { pastPositions })
+    await this.model.findByIdAndUpdate(candidateId, {
+      pastPositions: objectWithNumberKeysToMap(pastPositions),
+    })
   }
 }
