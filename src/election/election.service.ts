@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -172,7 +173,10 @@ export class ElectionService {
     await election.save()
 
     const extracted = extractElection(election)
-    response.jobStatus = await this.createElectionJobs(extracted)
+    response.jobStatus = await this.createElectionJobs(extracted, {
+      start,
+      end,
+    })
 
     response.message = 'Success'
     return response
@@ -240,7 +244,10 @@ export class ElectionService {
 
     if (updatedElection) {
       const extracted = extractElection(updatedElection)
-      response.jobStatus = await this.createElectionJobs(extracted)
+      response.jobStatus = await this.createElectionJobs(extracted, {
+        start,
+        end,
+      })
     }
 
     response.message = 'Success'
@@ -402,7 +409,7 @@ export class ElectionService {
     return { message: 'Vote cast successfully', voterId, candidateId }
   }
 
-  async createStartJob(election: ElectionWithId) {
+  async createStartJob(election: ElectionWithId, newDate: Date) {
     // Overwrite the start job if it exists
     if (election.startJobId) {
       try {
@@ -416,7 +423,7 @@ export class ElectionService {
       const job = await this.cronService.createJob({
         enabled: true,
         title: `Start ${getYear(election)} Election`,
-        schedule: this.cronService.dateToSchedule(election.startDate),
+        schedule: this.cronService.dateToSchedule(newDate),
         saveResponses: true,
         url: '/send-emails/pre-post',
       })
@@ -426,7 +433,7 @@ export class ElectionService {
     }
   }
 
-  async createEndJob(election: ElectionWithId) {
+  async createEndJob(election: ElectionWithId, newDate: Date) {
     // Overwrite the end job if it exists
     if (election.endJobId) {
       try {
@@ -440,7 +447,7 @@ export class ElectionService {
       const job = await this.cronService.createJob({
         enabled: true,
         title: `End ${getYear(election)} Election`,
-        schedule: this.cronService.dateToSchedule(election.endDate),
+        schedule: this.cronService.dateToSchedule(newDate),
         saveResponses: true,
         url: '/send-emails/pre-post',
       })
@@ -450,23 +457,33 @@ export class ElectionService {
 
   async createElectionJobs(
     election: ElectionWithId,
+    newDates: { start: Date; end: Date },
   ): Promise<CreateElectionResponse['jobStatus']> {
-    const results = await Promise.all([
-      new Promise((resolve: (value: 'Success' | 'Failed') => void) => {
-        this.createStartJob(election)
+    const startJobStatus = await new Promise<'Success' | 'Failed'>(
+      (resolve) => {
+        this.createStartJob(election, newDates.start)
           .then(() => resolve('Success'))
-          .catch(() => resolve('Failed'))
-      }),
-      new Promise((resolve: (value: 'Success' | 'Failed') => void) => {
-        this.createEndJob(election)
-          .then(() => resolve('Success'))
-          .catch(() => resolve('Failed'))
-      }),
-    ])
+          .catch((e) => {
+            console.error(e)
+            resolve('Failed')
+          })
+      },
+    )
+
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+
+    const endJobStatus = await new Promise<'Success' | 'Failed'>((resolve) => {
+      this.createEndJob(election, newDates.end)
+        .then(() => resolve('Success'))
+        .catch((e) => {
+          console.error(e)
+          resolve('Failed')
+        })
+    })
 
     return {
-      start: results[0],
-      end: results[1],
+      start: startJobStatus,
+      end: endJobStatus,
     }
   }
 }
