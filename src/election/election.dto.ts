@@ -125,12 +125,14 @@ export class ElectionSummary {
   @ApiProperty() active: boolean
 }
 
+export type JobStatusResult = 'Success' | 'Failed' | 'Skipped'
+
 export class CreateElectionResponse {
   message: 'Success'
   candidates?: BulkAddResponseDTO
   voters?: BulkAddResponseDTO
   jobStatus: {
-    start: 'Success' | 'Failed'
-    end: 'Success' | 'Failed'
+    start: JobStatusResult
+    end: JobStatusResult
   }
 }

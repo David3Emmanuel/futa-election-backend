@@ -24,6 +24,7 @@ import {
   PositionSummary,
   UpdateElectionDTO,
   DeleteCandidatesOrVotersDTO,
+  JobStatusResult,
 } from './election.dto'
 import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
@@ -468,33 +469,36 @@ export class ElectionService {
     newDates: { start: Date; end: Date },
   ): Promise<CreateElectionResponse['jobStatus']> {
     // TODO create reminders
-    // FIXME do not create job unless date actually changes
-    const startJobStatus = await new Promise<'Success' | 'Failed'>(
-      (resolve) => {
+    const jobStatus: CreateElectionResponse['jobStatus'] = {
+      start: 'Skipped',
+      end: 'Skipped',
+    }
+
+    if (election.startDate.getTime() !== newDates.start.getTime()) {
+      jobStatus.start = await new Promise<JobStatusResult>((resolve) => {
         this.createStartOrEndJob(election, newDates.start, 'Start')
           .then(() => resolve('Success'))
           .catch((e) => {
             console.error(e)
             resolve('Failed')
           })
-      },
-    )
+      })
+    }
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const endJobStatus = await new Promise<'Success' | 'Failed'>((resolve) => {
-      this.createStartOrEndJob(election, newDates.end, 'End')
-        .then(() => resolve('Success'))
-        .catch((e) => {
-          console.error(e)
-          resolve('Failed')
-        })
-    })
-
-    return {
-      start: startJobStatus,
-      end: endJobStatus,
+    if (election.endDate.getTime() !== newDates.end.getTime()) {
+      jobStatus.end = await new Promise<JobStatusResult>((resolve) => {
+        this.createStartOrEndJob(election, newDates.end, 'End')
+          .then(() => resolve('Success'))
+          .catch((e) => {
+            console.error(e)
+            resolve('Failed')
+          })
+      })
     }
+
+    return jobStatus
   }
 
   async getCandidatesByYear(year: number): Promise<CandidateWithId[]> {
