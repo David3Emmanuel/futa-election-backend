@@ -10,7 +10,6 @@ export class BulkAddResponseDTO {
 export class CreateCandidateDTO {
   @ApiProperty() name: string
   @ApiProperty() currentPosition: string
-  // TODO add image field
 }
 
 export class BulkAddRequestDTO {

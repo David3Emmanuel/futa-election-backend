@@ -14,7 +14,6 @@ export function isActive(election: Election) {
 @Schema()
 export class Election {
   // @ApiProperty() @Prop([String]) positions: string[]
-  // FIXME ensure only specified positions can be used
   @ApiProperty() @Prop([String]) voterIds: string[]
   @ApiProperty() @Prop([String]) candidateIds: string[]
   @ApiPropertyOptional() @Prop([Vote]) votes?: Vote[]
