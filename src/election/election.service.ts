@@ -219,7 +219,7 @@ export class ElectionService {
 
     const response = new CreateElectionResponse()
 
-    let new_candidates: string[] | undefined
+    let new_candidates: string[] = []
     if (candidates) {
       response.candidates =
         await this.candidateService.bulkAddCandidates(candidates)
@@ -237,7 +237,7 @@ export class ElectionService {
       }
     }
 
-    let new_voters: string[] | undefined
+    let new_voters: string[] = []
     if (voters) {
       response.voters = await this.voterService.bulkAddVoters(voters)
       new_voters = response.voters.ids
@@ -246,8 +246,8 @@ export class ElectionService {
     const updatedElection = await this.model.findByIdAndUpdate(election._id, {
       startDate: start,
       endDate: end,
-      candidateIds: new_candidates,
-      voterIds: new_voters,
+      candidateIds: [...new Set([...election.candidateIds, ...new_candidates])],
+      voterIds: [...new Set([...election.voterIds, ...new_voters])],
     })
 
     if (updatedElection) {
