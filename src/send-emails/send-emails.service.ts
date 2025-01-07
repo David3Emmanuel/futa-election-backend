@@ -15,6 +15,8 @@ export class SendEmailsService {
     private readonly voterService: VoterService,
   ) {}
 
+  // TODO replace date.toDateString() with date and time
+
   async sendBulkReminderEmails() {
     const election = await this.electionService.getLatestElection()
     if (!election) throw new NotFoundException('No elections found')
@@ -30,7 +32,7 @@ export class SendEmailsService {
       await this.emailService.sendMailWithTemplate(
         voter.email,
         subject,
-        '0r83ql3kzkv4zw1j',
+        'neqvygm5zmw40p7w',
         {
           email: voter.email,
           data: {
@@ -57,6 +59,7 @@ export class SendEmailsService {
           data: {
             link: `http://localhost:3000/vote?token=${token}`,
             startDate: election.startDate.toDateString(),
+            endDate: election.endDate.toDateString(),
           },
         },
       )
@@ -72,7 +75,7 @@ export class SendEmailsService {
       await this.emailService.sendMailWithTemplate(
         voter.email,
         subject,
-        '0r83ql3kzkv4zw1j',
+        '351ndgwo7654zqx8',
         {
           email: voter.email,
           data: {
