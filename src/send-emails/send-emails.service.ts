@@ -21,7 +21,18 @@ export class SendEmailsService {
     this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL')
   }
 
-  // TODO replace date.toDateString() with date and time
+  formatDateTime(date: Date) {
+    // Example: Tuesday 7, January 2025 12:00 PM
+    return date.toLocaleString('en-US', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true,
+    })
+  }
 
   async sendBulkReminderEmails() {
     const election = await this.electionService.getLatestElection()
@@ -43,7 +54,7 @@ export class SendEmailsService {
           email: voter.email,
           data: {
             link: `${this.frontendUrl}/vote?token=${token}`,
-            endDate: election.endDate.toDateString(),
+            endDate: this.formatDateTime(election.endDate),
           },
         },
       )
@@ -64,8 +75,8 @@ export class SendEmailsService {
           email: voter.email,
           data: {
             link: `${this.frontendUrl}/vote?token=${token}`,
-            startDate: election.startDate.toDateString(),
-            endDate: election.endDate.toDateString(),
+            startDate: this.formatDateTime(election.startDate),
+            endDate: this.formatDateTime(election.endDate),
           },
         },
       )
@@ -85,7 +96,7 @@ export class SendEmailsService {
           email: voter.email,
           data: {
             link: `${this.frontendUrl}/election/${getYear(election)}`,
-            endDate: election.endDate.toDateString(),
+            endDate: this.formatDateTime(election.endDate),
           },
         },
       )
