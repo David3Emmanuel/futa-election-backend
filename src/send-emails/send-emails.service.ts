@@ -2,18 +2,24 @@ import { Injectable, NotFoundException } from '@nestjs/common'
 import { ElectionService } from 'src/election/election.service'
 import { ElectionWithoutVotes } from 'src/election/hideVotes'
 import { EmailService } from 'src/email/email.service'
-import { isActive } from 'src/schemas/election.schema'
+import { getYear, isActive } from 'src/schemas/election.schema'
 import { VoteService } from 'src/vote/vote.service'
 import { VoterService } from 'src/voter/voter.service'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class SendEmailsService {
+  private readonly frontendUrl: string
+
   constructor(
     private readonly electionService: ElectionService,
     private readonly voteService: VoteService,
     private readonly emailService: EmailService,
     private readonly voterService: VoterService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL')
+  }
 
   // TODO replace date.toDateString() with date and time
 
@@ -36,7 +42,7 @@ export class SendEmailsService {
         {
           email: voter.email,
           data: {
-            link: `http://localhost:3000/vote?token=${token}`,
+            link: `${this.frontendUrl}/vote?token=${token}`,
             endDate: election.endDate.toDateString(),
           },
         },
@@ -57,7 +63,7 @@ export class SendEmailsService {
         {
           email: voter.email,
           data: {
-            link: `http://localhost:3000/vote?token=${token}`,
+            link: `${this.frontendUrl}/vote?token=${token}`,
             startDate: election.startDate.toDateString(),
             endDate: election.endDate.toDateString(),
           },
@@ -69,7 +75,6 @@ export class SendEmailsService {
   async sendBulkPostElectionEmails(election: ElectionWithoutVotes) {
     election.voterIds.forEach(async (voterId) => {
       const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
 
       const subject = 'Election results are out. Check them out'
       await this.emailService.sendMailWithTemplate(
@@ -79,7 +84,7 @@ export class SendEmailsService {
         {
           email: voter.email,
           data: {
-            link: `http://localhost:3000/vote?token=${token}`,
+            link: `${this.frontendUrl}/election/${getYear(election)}`,
             endDate: election.endDate.toDateString(),
           },
         },

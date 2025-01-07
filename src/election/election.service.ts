@@ -29,15 +29,21 @@ import { CandidateService } from 'src/candidate/candidate.service'
 import { VoterService } from 'src/voter/voter.service'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
 import { CronService } from 'src/cron/cron.service'
+import { ConfigService } from '@nestjs/config'
 
 @Injectable()
 export class ElectionService {
+  private readonly backendUrl: string
+
   constructor(
     @InjectModel(Election.name) private model: Model<Election>,
     private readonly candidateService: CandidateService,
     private readonly voterService: VoterService,
     private readonly cronService: CronService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.backendUrl = this.configService.getOrThrow<string>('BACKEND_URL')
+  }
 
   private async getLatestElectionWithVotes() {
     const election = await this.model.findOne().sort({ startDate: -1 }).exec()
@@ -432,7 +438,7 @@ export class ElectionService {
       title: `${type} ${getYear(election)} Election`,
       schedule: this.cronService.dateToSchedule(newDate),
       saveResponses: true,
-      url: '/send-emails/pre-post',
+      url: `${this.backendUrl}/send-emails/pre-post`,
     })
 
     const update =
@@ -444,6 +450,7 @@ export class ElectionService {
     election: ElectionWithId,
     newDates: { start: Date; end: Date },
   ): Promise<CreateElectionResponse['jobStatus']> {
+    // TODO create reminders
     const startJobStatus = await new Promise<'Success' | 'Failed'>(
       (resolve) => {
         this.createStartOrEndJob(election, newDates.start, 'Start')
