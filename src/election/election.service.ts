@@ -182,10 +182,11 @@ export class ElectionService {
     await election.save()
 
     const extracted = extractElection(election)
-    response.jobStatus = await this.createElectionJobs(extracted, {
-      start,
-      end,
-    })
+    response.jobStatus = await this.createElectionJobs(
+      extracted,
+      { start, end },
+      true,
+    )
 
     response.message = 'Success'
     return response
@@ -467,6 +468,7 @@ export class ElectionService {
   async createElectionJobs(
     election: ElectionWithId,
     newDates: { start: Date; end: Date },
+    forceCreate = false,
   ): Promise<CreateElectionResponse['jobStatus']> {
     // TODO create reminders
     const jobStatus: CreateElectionResponse['jobStatus'] = {
@@ -474,7 +476,10 @@ export class ElectionService {
       end: 'Skipped',
     }
 
-    if (election.startDate.getTime() !== newDates.start.getTime()) {
+    if (
+      forceCreate ||
+      election.startDate.getTime() !== newDates.start.getTime()
+    ) {
       jobStatus.start = await new Promise<JobStatusResult>((resolve) => {
         this.createStartOrEndJob(election, newDates.start, 'Start')
           .then(() => resolve('Success'))
@@ -487,7 +492,7 @@ export class ElectionService {
 
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    if (election.endDate.getTime() !== newDates.end.getTime()) {
+    if (forceCreate || election.endDate.getTime() !== newDates.end.getTime()) {
       jobStatus.end = await new Promise<JobStatusResult>((resolve) => {
         this.createStartOrEndJob(election, newDates.end, 'End')
           .then(() => resolve('Success'))
