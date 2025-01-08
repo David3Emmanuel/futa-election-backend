@@ -8,7 +8,6 @@ import {
   Body,
 } from '@nestjs/common'
 import { ElectionService } from './election.service'
-import { ElectionWithoutVotes } from './hideVotes'
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -26,6 +25,8 @@ import {
   UpdateElectionDTO,
   CreateElectionResponse,
   DeleteCandidatesOrVotersDTO,
+  addPeopleCount,
+  FetchElectionResponse,
 } from './election.dto'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
 
@@ -36,13 +37,13 @@ export class ElectionController {
   @Get('active')
   @ApiOkResponse({
     description: 'Get the active election',
-    type: ElectionWithoutVotes,
+    type: FetchElectionResponse,
   })
   @ApiNotFoundResponse({
     description: 'There is no active election',
   })
-  getActiveElection() {
-    return this.electionService.getActiveElection()
+  async getActiveElection() {
+    return addPeopleCount(await this.electionService.getActiveElection())
   }
 
   @Get('active/summary')
@@ -64,13 +65,13 @@ export class ElectionController {
   @Get('latest')
   @ApiOkResponse({
     description: 'Get the latest election',
-    type: ElectionWithoutVotes,
+    type: FetchElectionResponse,
   })
   @ApiNotFoundResponse({
     description: 'No elections found',
   })
-  getLatestElection() {
-    return this.electionService.getLatestElection()
+  async getLatestElection() {
+    return addPeopleCount(await this.electionService.getLatestElection())
   }
 
   @Get('latest/summary')
@@ -92,13 +93,13 @@ export class ElectionController {
   @Get(':year')
   @ApiOkResponse({
     description: 'Get election by year',
-    type: ElectionWithoutVotes,
+    type: FetchElectionResponse,
   })
   @ApiNotFoundResponse({
     description: 'Election not found for the given year',
   })
-  getElectionByYear(@Param('year') year: number) {
-    return this.electionService.getElectionByYear(year)
+  async getElectionByYear(@Param('year') year: number) {
+    return addPeopleCount(await this.electionService.getElectionByYear(year))
   }
 
   @Get(':year/summary')

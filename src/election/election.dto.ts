@@ -6,6 +6,7 @@ import {
 } from 'src/candidate/candidate.dto'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
 import { Voter } from 'src/schemas/voter.schema'
+import { ElectionWithoutVotes } from './hideVotes'
 
 export class CreateElectionDTO {
   @ApiProperty({
@@ -135,4 +136,16 @@ export class CreateElectionResponse {
     start: JobStatusResult
     end: JobStatusResult
   }
+}
+
+export class FetchElectionResponse extends ElectionWithoutVotes {
+  @ApiProperty() numberOfCandidates: number
+  @ApiProperty() numberOfVoters: number
+}
+
+export function addPeopleCount(election: ElectionWithoutVotes) {
+  return Object.assign(new FetchElectionResponse(), election, {
+    numberOfCandidates: election.candidateIds.length,
+    numberOfVoters: election.voterIds.length,
+  }) as FetchElectionResponse
 }
