@@ -91,18 +91,6 @@ export class ElectionController {
     return this.electionService.getLatestElectionSummary()
   }
 
-  @Get(':year')
-  @ApiOkResponse({
-    description: 'Get election by year',
-    type: FetchElectionResponse,
-  })
-  @ApiNotFoundResponse({
-    description: 'Election not found for the given year',
-  })
-  async getElectionByYear(@Param('year') year: number) {
-    return addPeopleCount(await this.electionService.getElectionByYear(year))
-  }
-
   @Get(':year/summary')
   @ApiOkResponse({
     description: 'Get election summary by year',
@@ -195,33 +183,6 @@ export class ElectionController {
 
   @ApiBearerAuth()
   @UseGuards(JWTAuthGuard)
-  @Patch(':year')
-  @ApiOperation({
-    summary: 'Update election by year',
-    description: 'WARNING: This will delete all existing votes',
-  })
-  @ApiOkResponse({
-    description: 'Update election by year',
-    type: CreateElectionResponse,
-  })
-  @ApiNotFoundResponse({
-    description: 'Election not found for the given year',
-  })
-  @ApiUnauthorizedResponse({
-    description: 'Unauthorized',
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid data',
-  })
-  updateElectionByYear(
-    @Param('year') year: number,
-    @Body() updateElectionDTO: UpdateElectionDTO,
-  ) {
-    return this.electionService.updateElectionByYear(year, updateElectionDTO)
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(JWTAuthGuard)
   @Patch('remove-people')
   @ApiOperation({
     summary: 'Delete candidates or voters from the latest election',
@@ -246,5 +207,44 @@ export class ElectionController {
     return this.electionService.deleteCandidatesOrVoters(
       deleteCandidatesOrVotersDTO,
     )
+  }
+
+  @Get(':year')
+  @ApiOkResponse({
+    description: 'Get election by year',
+    type: FetchElectionResponse,
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  async getElectionByYear(@Param('year') year: number) {
+    return addPeopleCount(await this.electionService.getElectionByYear(year))
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @Patch(':year')
+  @ApiOperation({
+    summary: 'Update election by year',
+    description: 'WARNING: This will delete all existing votes',
+  })
+  @ApiOkResponse({
+    description: 'Update election by year',
+    type: CreateElectionResponse,
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  @ApiBadRequestResponse({
+    description: 'Invalid data',
+  })
+  updateElectionByYear(
+    @Param('year') year: number,
+    @Body() updateElectionDTO: UpdateElectionDTO,
+  ) {
+    return this.electionService.updateElectionByYear(year, updateElectionDTO)
   }
 }
