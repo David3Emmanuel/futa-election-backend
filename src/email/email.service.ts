@@ -1,7 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common'
+import { HttpException, Inject, Injectable } from '@nestjs/common'
 import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend'
 import { EmailModuleOptions } from './email.types'
 import { MODULE_OPTIONS_TOKEN } from './email.module-definition'
+
+export interface EmailError {
+  headers: any
+  body: {
+    message: string
+    errors: any
+  }
+  statusCode: number
+}
 
 @Injectable()
 export class EmailService {
@@ -20,6 +29,18 @@ export class EmailService {
     )
   }
 
+  private async _sendMail(emailParams: EmailParams) {
+    try {
+      return await this.mailerSend.email.send(emailParams)
+    } catch (e) {
+      // console.error(e)
+      throw new HttpException(
+        e.body.message || 'Failed to send email',
+        e.statusCode || 500,
+      )
+    }
+  }
+
   async sendMail(to: string, subject: string, text: string) {
     const recipient = new Recipient(to)
 
@@ -29,7 +50,7 @@ export class EmailService {
       .setText(text)
       .setTo([recipient])
 
-    return await this.mailerSend.email.send(emailParams)
+    return await this._sendMail(emailParams)
   }
 
   async sendMailWithTemplate(
@@ -47,6 +68,6 @@ export class EmailService {
       .setPersonalization([personalization])
       .setTo([recipient])
 
-    return await this.mailerSend.email.send(emailParams)
+    return await this._sendMail(emailParams)
   }
 }

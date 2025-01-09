@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common'
 import { ElectionService } from 'src/election/election.service'
 import { ElectionWithoutVotes } from 'src/election/hideVotes'
 import { EmailService } from 'src/email/email.service'
@@ -129,7 +133,9 @@ export class SendEmailsService {
       await this.sendBulkPostElectionEmails(election)
       return { message: 'Post-election emails sent' }
     } else {
-      throw new Error('Not the right time to send emails')
+      throw new UnprocessableEntityException(
+        'Not the right time to send emails',
+      )
     }
   }
 }
