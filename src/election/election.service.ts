@@ -55,7 +55,6 @@ export class ElectionService {
   }
 
   private async getElectionByYearWithVotes(year: number) {
-    console.log(year)
     const election = await this.model
       .findOne({
         startDate: {

@@ -41,66 +41,72 @@ export class SendEmailsService {
       throw new NotFoundException('There is no active election')
 
     // FIXME do not send emails to voters who have already voted
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
+    await Promise.all(
+      election.voterIds.map(async (voterId) => {
+        const voter = await this.voterService.getVoterById(voterId)
+        const token = await this.voteService.generateToken(voter)
 
-      const subject = 'Vote in the upcoming election'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        'neqvygm5zmw40p7w',
-        {
-          email: voter.email,
-          data: {
-            link: `${this.frontendUrl}/vote?token=${token}`,
-            endDate: this.formatDateTime(election.endDate),
+        const subject = 'Vote in the upcoming election'
+        await this.emailService.sendMailWithTemplate(
+          voter.email,
+          subject,
+          'neqvygm5zmw40p7w',
+          {
+            email: voter.email,
+            data: {
+              link: `${this.frontendUrl}/vote?token=${token}`,
+              endDate: this.formatDateTime(election.endDate),
+            },
           },
-        },
-      )
-    })
+        )
+      }),
+    )
   }
 
   async sendBulkPreElectionEmails(election: ElectionWithoutVotes) {
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
-      const token = await this.voteService.generateToken(voter)
+    await Promise.all(
+      election.voterIds.map(async (voterId) => {
+        const voter = await this.voterService.getVoterById(voterId)
+        const token = await this.voteService.generateToken(voter)
 
-      const subject = 'Vote in the upcoming election. Starts within an hour'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        '0r83ql3kzkv4zw1j',
-        {
-          email: voter.email,
-          data: {
-            link: `${this.frontendUrl}/vote?token=${token}`,
-            startDate: this.formatDateTime(election.startDate),
-            endDate: this.formatDateTime(election.endDate),
+        const subject = 'Vote in the upcoming election. Starts within an hour'
+        await this.emailService.sendMailWithTemplate(
+          voter.email,
+          subject,
+          '0r83ql3kzkv4zw1j',
+          {
+            email: voter.email,
+            data: {
+              link: `${this.frontendUrl}/vote?token=${token}`,
+              startDate: this.formatDateTime(election.startDate),
+              endDate: this.formatDateTime(election.endDate),
+            },
           },
-        },
-      )
-    })
+        )
+      }),
+    )
   }
 
   async sendBulkPostElectionEmails(election: ElectionWithoutVotes) {
-    election.voterIds.forEach(async (voterId) => {
-      const voter = await this.voterService.getVoterById(voterId)
+    await Promise.all(
+      election.voterIds.map(async (voterId) => {
+        const voter = await this.voterService.getVoterById(voterId)
 
-      const subject = 'Election results are out. Check them out'
-      await this.emailService.sendMailWithTemplate(
-        voter.email,
-        subject,
-        '351ndgwo7654zqx8',
-        {
-          email: voter.email,
-          data: {
-            link: `${this.frontendUrl}/election/${getYear(election)}`,
-            endDate: this.formatDateTime(election.endDate),
+        const subject = 'Election results are out. Check them out'
+        await this.emailService.sendMailWithTemplate(
+          voter.email,
+          subject,
+          '351ndgwo7654zqx8',
+          {
+            email: voter.email,
+            data: {
+              link: `${this.frontendUrl}/election/${getYear(election)}`,
+              endDate: this.formatDateTime(election.endDate),
+            },
           },
-        },
-      )
-    })
+        )
+      }),
+    )
   }
 
   async sendPreOrPostElectionEmails() {
@@ -114,10 +120,12 @@ export class SendEmailsService {
     const endTime = election.endDate.getTime()
     if (startTime - 3600000 < now && now < startTime) {
       // Send pre-election emails
+      console.log('Sending pre-election emails...')
       await this.sendBulkPreElectionEmails(election)
       return { message: 'Pre-election emails sent' }
     } else if (now > endTime) {
       // Send post-election emails
+      console.log('Sending post-election emails...')
       await this.sendBulkPostElectionEmails(election)
       return { message: 'Post-election emails sent' }
     } else {
