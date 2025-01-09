@@ -31,6 +31,7 @@ import { VoterService } from 'src/voter/voter.service'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
 import { CronService } from 'src/cron/cron.service'
 import { ConfigService } from '@nestjs/config'
+import { VoterWithId } from 'src/schemas/voter.schema'
 
 @Injectable()
 export class ElectionService {
@@ -514,6 +515,15 @@ export class ElectionService {
       election.candidateIds.map((id) =>
         this.candidateService.getCandidateById(id),
       ),
+    )
+  }
+
+  async getVotersByYear(year: number): Promise<VoterWithId[]> {
+    const election = await this.getElectionByYear(year)
+    if (!election)
+      throw new NotFoundException('Election not found for the given year')
+    return Promise.all(
+      election.voterIds.map((id) => this.voterService.getVoterById(id)),
     )
   }
 }

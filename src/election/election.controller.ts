@@ -29,6 +29,7 @@ import {
   FetchElectionResponse,
 } from './election.dto'
 import { CandidateWithId } from 'src/schemas/candidate.schema'
+import { VoterWithId } from 'src/schemas/voter.schema'
 
 @Controller('election')
 export class ElectionController {
@@ -133,6 +134,21 @@ export class ElectionController {
     @Param('year') year: number,
   ): Promise<CandidateWithId[]> {
     return this.electionService.getCandidatesByYear(year)
+  }
+
+  @Get(':year/voters')
+  @ApiOkResponse({
+    description: 'Get all voters for a particular year',
+    type: [VoterWithId],
+  })
+  @ApiNotFoundResponse({
+    description: 'Election not found for the given year',
+  })
+  @ApiOperation({
+    summary: 'Get all voters for a particular year',
+  })
+  async getVotersByYear(@Param('year') year: number): Promise<VoterWithId[]> {
+    return this.electionService.getVotersByYear(year)
   }
 
   @ApiBearerAuth()
