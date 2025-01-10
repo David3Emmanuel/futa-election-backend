@@ -2,7 +2,12 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { SignUpDTO } from 'src/auth/auth.dto'
-import { asPublicUser, extractUser, User } from 'src/schemas/user.schema'
+import {
+  asPublicUser,
+  extractUser,
+  PublicUser,
+  User,
+} from 'src/schemas/user.schema'
 import * as bcrypt from 'bcryptjs'
 
 @Injectable()
@@ -48,5 +53,11 @@ export class UsersService {
 
   private async findUserById(userId: string): Promise<User | null> {
     return this.model.findById(userId).exec()
+  }
+
+  async updatePassword(user: PublicUser, password: string) {
+    const salt = await bcrypt.genSalt()
+    const passwordHash = await bcrypt.hash(password, salt)
+    await this.model.findByIdAndUpdate(user._id, { passwordHash }).exec()
   }
 }
