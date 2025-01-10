@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common'
 import { ValidationError } from 'class-validator'
 import { Response } from 'express'
+import { CastError } from 'mongoose'
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
@@ -14,13 +15,20 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse<Response>()
 
-    // if (exception instanceof ValidationError) {
     if (exception.constructor.name === ValidationError.name) {
       response.status(HttpStatus.BAD_REQUEST).json({
         statusCode: HttpStatus.BAD_REQUEST,
         message: exception.message,
       })
       return
+    }
+
+    if (exception.constructor.name === 'CastError') {
+      const castError = exception as CastError
+      response.status(HttpStatus.BAD_REQUEST).json({
+        statusCode: HttpStatus.BAD_REQUEST,
+        message: `Invalid ${castError.kind}: ${castError.value}`,
+      })
     }
 
     if (!(exception instanceof HttpException)) console.error(exception)
