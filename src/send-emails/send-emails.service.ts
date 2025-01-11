@@ -110,13 +110,13 @@ export class SendEmailsService {
   async sendPreOrPostElectionEmails() {
     const election = await this.electionService.getLatestElection()
     if (!election) throw new NotFoundException('No elections found')
-    if (isActive(election))
-      throw new NotFoundException('Election is still active')
+    // if (isActive(election))
+    //   throw new NotFoundException('Election is still active')
 
     const now = new Date().getTime()
     const startTime = election.startDate.getTime()
     const endTime = election.endDate.getTime()
-    if (startTime - 3600000 < now && now < startTime) {
+    if (isActive(election) || (startTime - 3600000 < now && now < startTime)) {
       // Send pre-election emails
       console.log('Sending pre-election emails...')
       await this.sendBulkPreElectionEmails(election)
