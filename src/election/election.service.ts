@@ -405,29 +405,31 @@ export class ElectionService {
       throw new NotFoundException('Candidate not found in this election')
 
     // Confirm that voter has not voted before
-    const candidate = await this.candidateService.getCandidateById(candidateId)
+    // const candidate = await this.candidateService.getCandidateById(candidateId)
 
-    if (election.votes) {
-      if (
-        election.votes.find(async (vote) => {
-          const votedCandidate = await this.candidateService.getCandidateById(
-            vote.candidateId,
-          )
-          console.log(
-            `Checking vote: voterId=${vote.voterId}, candidateId=${vote.candidateId}, currentPosition=${votedCandidate.currentPosition}`,
-          )
-          return (
-            vote.voterId === voterId &&
-            votedCandidate.currentPosition === candidate.currentPosition
-          )
-        })
-      )
-        console.log('Skipped error') //throw new ConflictException('Voter has already voted for this position')
-    } else {
-      election.votes = []
-    }
+    // if (election.votes) {
+    //   if (
+    //     election.votes.find(async (vote) => {
+    //       const votedCandidate = await this.candidateService.getCandidateById(
+    //         vote.candidateId,
+    //       )
+    //       console.log(
+    //         `Checking vote: voterId=${vote.voterId}, candidateId=${vote.candidateId}, currentPosition=${votedCandidate.currentPosition}`,
+    //       )
+    //       return (
+    //         vote.voterId === voterId &&
+    //         votedCandidate.currentPosition === candidate.currentPosition
+    //       )
+    //     })
+    //   )
+    //     console.log('Skipped error') //throw new ConflictException('Voter has already voted for this position')
+    // } else {
+    //   election.votes = []
+    // }
 
-    election.votes.push({ voterId, candidateId })
+    if (!election.votes) election.votes = []
+
+    election.votes?.push({ voterId, candidateId })
     await this.model.findByIdAndUpdate(election._id, { votes: election.votes })
 
     return { message: 'Vote cast successfully', voterId, candidateId }
