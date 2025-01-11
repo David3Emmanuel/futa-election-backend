@@ -22,7 +22,7 @@ import { ElectionModule } from 'src/election/election.module'
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET_KEY'),
-        signOptions: { expiresIn: '7d' },
+        signOptions: { expiresIn: '365d' },
       }),
     }),
     ElectionModule,
