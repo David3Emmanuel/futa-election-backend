@@ -16,7 +16,7 @@ import { VoterModule } from 'src/voter/voter.module'
     VoterModule,
     EmailModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        apiKey: config.getOrThrow<string>('MAILERSEND_API_KEY'),
+        auth: config.getOrThrow<string>('ZEPTOMAIL_AUTH'),
         senderDomain: config.getOrThrow<string>('SENDER_DOMAIN'),
         senderName: 'FUTA Election',
       }),

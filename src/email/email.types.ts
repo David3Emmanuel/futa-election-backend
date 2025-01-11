@@ -1,5 +1,5 @@
 export interface EmailModuleOptions {
-  apiKey: string
+  auth: string
   senderDomain: string
   senderName: string
 }

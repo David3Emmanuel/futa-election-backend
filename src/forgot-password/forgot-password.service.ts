@@ -21,19 +21,22 @@ export class ForgotPasswordService {
     if (!user) return
 
     const resetLink = this.generateResetLink(user)
-    return { resetLink }
-
-    // await this.emailService.sendMail(
-    //   user.email,
-    //   'Reset your password',
-    //   `Click here to reset your password: ${this.generateResetLink(user)}`,
-    //   )
+    await this.emailService.sendMail(
+      [{ address: email }],
+      'Reset your password',
+      `Hello,\n\n` +
+        `You requested to reset your password. ` +
+        `Please click the link below to reset your password.\n\n` +
+        `${resetLink}\n\n` +
+        `If you did not request this, please ignore this email.\n\n` +
+        `Thank you!`,
+    )
   }
 
   private generateResetLink(user: PublicUser) {
-    // const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL')
+    const frontendUrl = this.configService.getOrThrow<string>('FRONTEND_URL')
     const token = this.jwtService.sign({ ...user, type: 'reset' })
-    return token // `${frontendUrl}/reset-password?token=${token}`
+    return `${frontendUrl}/reset-password?token=${token}`
   }
 
   async resetPassword(

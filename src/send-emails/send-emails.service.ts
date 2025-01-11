@@ -50,18 +50,17 @@ export class SendEmailsService {
         const voter = await this.voterService.getVoterById(voterId)
         const token = await this.voteService.generateToken(voter)
 
-        const subject = 'Vote in the upcoming election'
-        await this.emailService.sendMailWithTemplate(
-          voter.email,
+        const subject = 'Reminder to vote in the ongoing election'
+
+        await this.emailService.sendMail(
+          [{ address: voter.email }],
           subject,
-          'neqvygm5zmw40p7w',
-          {
-            email: voter.email,
-            data: {
-              link: `${this.frontendUrl}/vote?token=${token}`,
-              endDate: this.formatDateTime(election.endDate),
-            },
-          },
+          `Hello,\n\n` +
+            `The election is still ongoing. ` +
+            `Please click the link below to vote.\n\n` +
+            `${this.frontendUrl}/vote?token=${token}\n\n` +
+            `Election ends: ${this.formatDateTime(election.endDate)}\n\n` +
+            `Thank you for voting!`,
         )
       }),
     )
@@ -74,18 +73,17 @@ export class SendEmailsService {
         const token = await this.voteService.generateToken(voter)
 
         const subject = 'Vote in the upcoming election. Starts within an hour'
-        await this.emailService.sendMailWithTemplate(
-          voter.email,
+
+        await this.emailService.sendMail(
+          [{ address: voter.email }],
           subject,
-          '0r83ql3kzkv4zw1j',
-          {
-            email: voter.email,
-            data: {
-              link: `${this.frontendUrl}/vote?token=${token}`,
-              startDate: this.formatDateTime(election.startDate),
-              endDate: this.formatDateTime(election.endDate),
-            },
-          },
+          `Hello,\n\n` +
+            `The election will start within an hour. ` +
+            `Please click the link below to vote.\n\n` +
+            `${this.frontendUrl}/vote?token=${token}\n\n` +
+            `Election starts: ${this.formatDateTime(election.startDate)}\n` +
+            `Election ends: ${this.formatDateTime(election.endDate)}\n\n` +
+            `Thank you for voting!`,
         )
       }),
     )
@@ -95,19 +93,17 @@ export class SendEmailsService {
     await Promise.all(
       election.voterIds.map(async (voterId) => {
         const voter = await this.voterService.getVoterById(voterId)
+        const subject = 'Election has ended. View the results'
 
-        const subject = 'Election results are out. Check them out'
-        await this.emailService.sendMailWithTemplate(
-          voter.email,
+        await this.emailService.sendMail(
+          [{ address: voter.email }],
           subject,
-          '351ndgwo7654zqx8',
-          {
-            email: voter.email,
-            data: {
-              link: `${this.frontendUrl}/election/${getYear(election)}`,
-              endDate: this.formatDateTime(election.endDate),
-            },
-          },
+          `Hello,\n\n` +
+            `The election has ended. ` +
+            `Please click the link below to view the results.\n\n` +
+            `${this.frontendUrl}/results/${getYear(election)}\n\n` +
+            `Election ended: ${this.formatDateTime(election.endDate)}\n\n` +
+            `Thank you for voting!`,
         )
       }),
     )

@@ -20,9 +20,8 @@ export class ForgotPasswordController {
 
   @Post()
   async forgotPassword(@Body() body: ForgotPasswordRequest) {
-    const res = await this.service.forgotPassword(body.email)
+    await this.service.forgotPassword(body.email)
     return {
-      ...res,
       message: 'A request link has been sent if this email exists.',
     }
   }

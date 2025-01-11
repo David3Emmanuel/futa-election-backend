@@ -1,73 +1,48 @@
 import { HttpException, Inject, Injectable } from '@nestjs/common'
-import { EmailParams, MailerSend, Recipient, Sender } from 'mailersend'
 import { EmailModuleOptions } from './email.types'
 import { MODULE_OPTIONS_TOKEN } from './email.module-definition'
 
-export interface EmailError {
-  headers: any
-  body: {
-    message: string
-    errors: any
-  }
-  statusCode: number
-}
-
 @Injectable()
 export class EmailService {
-  mailerSend: MailerSend
-  sender: Sender
+  authorization: string
 
   constructor(@Inject(MODULE_OPTIONS_TOKEN) options: EmailModuleOptions) {
-    if (!options.apiKey) {
-      throw new Error('MAILERSEND_API_KEY is required')
+    if (!options.auth) {
+      throw new Error('ZEPTOMAIL_AUTH is required')
     }
-
-    this.mailerSend = new MailerSend({ apiKey: options.apiKey })
-    this.sender = new Sender(
-      `noreply@${options.senderDomain}`,
-      options.senderName,
-    )
+    this.authorization = options.auth
   }
 
-  private async _sendMail(emailParams: EmailParams) {
-    try {
-      return await this.mailerSend.email.send(emailParams)
-    } catch (e) {
-      // console.error(e)
-      throw new HttpException(
-        e.body.message || 'Failed to send email',
-        e.statusCode || 500,
-      )
-    }
-  }
-
-  async sendMail(to: string, subject: string, text: string) {
-    const recipient = new Recipient(to)
-
-    const emailParams = new EmailParams()
-      .setFrom(this.sender)
-      .setSubject(subject)
-      .setText(text)
-      .setTo([recipient])
-
-    return await this._sendMail(emailParams)
-  }
-
-  async sendMailWithTemplate(
-    to: string,
+  async sendMail(
+    to: { address: string; name?: string }[],
     subject: string,
-    templateId: string,
-    personalization: any,
+    htmlbody: string,
   ) {
-    const recipient = new Recipient(to)
-
-    const emailParams = new EmailParams()
-      .setFrom(this.sender)
-      .setSubject(subject)
-      .setTemplateId(templateId)
-      .setPersonalization([personalization])
-      .setTo([recipient])
-
-    return await this._sendMail(emailParams)
+    const res = await fetch('https://api.zeptomail.com/v1.1/email', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: this.authorization,
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        from: {
+          address: 'noreply@futaaec.com',
+          name: 'FUTA AEC',
+        },
+        to: to.map((recipient) => ({
+          email_address: {
+            address: recipient.address,
+            name: recipient.name,
+          },
+        })),
+        subject,
+        htmlbody,
+      }),
+    })
+    const data = await res.json()
+    console.log(data)
+    if (res.ok) return data
+    else throw new HttpException(data, res.status)
   }
 }
