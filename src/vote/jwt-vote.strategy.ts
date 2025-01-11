@@ -37,3 +37,4 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
     }
   }
 }
+//
