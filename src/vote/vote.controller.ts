@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JWTVoteGuard } from './jwt-vote.guard'
 import { Voter, VoterWithId } from 'src/schemas/voter.schema'
@@ -12,6 +12,14 @@ export class VoteController {
     private readonly voteService: VoteService,
     private readonly electionService: ElectionService,
   ) {}
+
+  @ApiOperation({ summary: 'Verify Token' })
+  @ApiBearerAuth()
+  @UseGuards(JWTVoteGuard)
+  @Get('verify')
+  async verify(@Request() req: Request & { user: VoterWithId }) {
+    return { message: 'Token is valid', voter: req.user }
+  }
 
   @ApiOperation({ summary: 'Cast a vote' })
   @ApiBearerAuth()
