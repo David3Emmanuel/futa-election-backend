@@ -18,6 +18,22 @@ export class EmailService {
     subject: string,
     htmlbody: string,
   ) {
+    const body = {
+      from: {
+        address: 'noreply@futaaec.com',
+        name: 'FUTA AEC',
+      },
+      to: to.map((recipient) => ({
+        email_address: {
+          address: recipient.address,
+          name: recipient.name,
+        },
+      })),
+      subject,
+      htmlbody,
+    }
+    return console.log(body.to[0], { ...body, to: undefined })
+
     const res = await fetch('https://api.zeptomail.com/v1.1/email', {
       method: 'POST',
       headers: {
@@ -25,20 +41,7 @@ export class EmailService {
         Authorization: this.authorization,
         Accept: 'application/json',
       },
-      body: JSON.stringify({
-        from: {
-          address: 'noreply@futaaec.com',
-          name: 'FUTA AEC',
-        },
-        to: to.map((recipient) => ({
-          email_address: {
-            address: recipient.address,
-            name: recipient.name,
-          },
-        })),
-        subject,
-        htmlbody,
-      }),
+      body: JSON.stringify(body),
     })
     const data = await res.json()
     console.log(data)
