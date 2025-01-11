@@ -45,16 +45,9 @@ function convertHeaderToCamelCase(sheet: xlsx.WorkSheet) {
 }
 
 function camelCase(str: string) {
-  // Turn normal text into camelCase
-  // For example, "Hello, world!" becomes "helloWorld"
-
-  // Remove all non-alphanumeric characters
   let out = str.replace(/[^a-zA-Z0-9\s]/g, '')
-  // Replace whitespace with underscores
   out = out.replace(/\s+/g, '_')
-  // Convert to camelCase
   out = out.replace(/_./g, (match) => match.charAt(1).toUpperCase())
-  // Lowercase the first character
   out = out.charAt(0).toLowerCase() + out.slice(1)
 
   return out

@@ -13,7 +13,6 @@ export class SessionService {
     @InjectModel(Session.name) private model: Model<Session>,
     private jwtService: JwtService,
   ) {
-    // Delete all sessions
     console.log('Resetting sessions...')
     this.model
       .deleteMany()

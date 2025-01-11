@@ -26,7 +26,6 @@ export class SendEmailsService {
   }
 
   formatDateTime(date: Date) {
-    // Example: Tuesday 7, January 2025 12:00 PM
     return date.toLocaleString('en-US', {
       weekday: 'long',
       day: 'numeric',
@@ -35,6 +34,7 @@ export class SendEmailsService {
       hour: 'numeric',
       minute: 'numeric',
       hour12: true,
+      timeZone: 'Africa/Lagos',
     })
   }
 
@@ -110,8 +110,6 @@ export class SendEmailsService {
   async sendPreOrPostElectionEmails() {
     const election = await this.electionService.getLatestElection()
     if (!election) throw new NotFoundException('No elections found')
-    // if (isActive(election))
-    //   throw new NotFoundException('Election is still active')
 
     const now = new Date().getTime()
     const startTime = election.startDate.getTime()
