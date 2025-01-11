@@ -6,7 +6,7 @@ import {
 import { ElectionService } from 'src/election/election.service'
 import { ElectionWithoutVotes } from 'src/election/hideVotes'
 import { EmailService } from 'src/email/email.service'
-import { getYear, isActive } from 'src/schemas/election.schema'
+import { isActive } from 'src/schemas/election.schema'
 import { VoteService } from 'src/vote/vote.service'
 import { VoterService } from 'src/voter/voter.service'
 import { ConfigService } from '@nestjs/config'
@@ -101,7 +101,7 @@ export class SendEmailsService {
           `Hello,\n\n` +
             `The election has ended. ` +
             `Please click the link below to view the results.\n\n` +
-            `${this.frontendUrl}/results/${getYear(election)}\n\n` +
+            `${this.frontendUrl}/dashboard/election/summary\n\n` +
             `Election ended: ${this.formatDateTime(election.endDate)}\n\n` +
             `Thank you for voting!`,
         )
