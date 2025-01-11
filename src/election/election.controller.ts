@@ -262,6 +262,7 @@ export class ElectionController {
     description: 'Unauthorized',
   })
   async deleteLatestElection() {
-    return this.electionService.deleteLatestElection()
+    await this.electionService.deleteLatestElection()
+    return { message: 'Deleted latest election' }
   }
 }
