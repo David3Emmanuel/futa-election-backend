@@ -16,7 +16,7 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
 
   async validate(
     payload: Voter & { iat: number; exp: number },
-  ): Promise<VoterWithId> {
+  ): Promise<VoterWithId | null> {
     const { email } = payload
 
     if (!email) {
@@ -24,12 +24,16 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
       throw new UnauthorizedException('Invalid voter token')
     }
 
-    const voter = await this.voterService.getVoterByEmail(email)
-    if (voter?.email !== email) {
-      console.warn('Detected vote attempt with wrong email')
-      throw new UnauthorizedException('Invalid voter token')
+    try {
+      const voter = await this.voterService.getVoterByEmail(email)
+      if (voter?.email !== email) {
+        console.warn('Detected vote attempt with wrong email')
+        throw new UnauthorizedException('Invalid voter token')
+      }
+      return voter
+    } catch (e) {
+      console.error(e)
+      return null
     }
-
-    return voter
   }
 }

@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JWTVoteGuard } from './jwt-vote.guard'
-import { VoterWithId } from 'src/schemas/voter.schema'
+import { Voter, VoterWithId } from 'src/schemas/voter.schema'
 import { VoteDTO, VotesDTO } from './vote.dto'
 import { VoteService } from './vote.service'
 import { ElectionService } from 'src/election/election.service'
@@ -35,6 +35,7 @@ export class VoteController {
     @Body() voteDto: VotesDTO,
     @Request() req: Request & { user: VoterWithId },
   ) {
+    console.log(req.user, voteDto)
     return await Promise.all(
       voteDto.candidateIds.map((candidateId) =>
         this.electionService.castVote(req.user._id.toString(), candidateId),
@@ -42,8 +43,8 @@ export class VoteController {
     )
   }
 
-  // @Post('token')
-  // async getToken(@Body() voter: Voter) {
-  //   return { token: await this.voteService.generateToken(voter) }
-  // }
+  @Post('token')
+  async getToken(@Body() voter: Voter) {
+    return { token: await this.voteService.generateToken(voter) }
+  }
 }
