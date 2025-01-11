@@ -11,6 +11,7 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module'
 import { SpreadsheetModule } from './spreadsheet/spreadsheet.module'
 import { SendEmailsModule } from './send-emails/send-emails.module'
 import { ForgotPasswordModule } from './forgot-password/forgot-password.module'
+import { TestController } from './test.controller'
 
 @Module({
   imports: [
@@ -33,5 +34,6 @@ import { ForgotPasswordModule } from './forgot-password/forgot-password.module'
     SendEmailsModule,
     ForgotPasswordModule,
   ],
+  controllers: [TestController],
 })
 export class AppModule {}
