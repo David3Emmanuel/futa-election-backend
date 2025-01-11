@@ -62,6 +62,17 @@ export class VoteController {
     return results
   }
 
+  @ApiOperation({ summary: 'Check if already voted' })
+  @ApiBearerAuth()
+  @UseGuards(JWTVoteGuard)
+  @Get('already-voted')
+  async alreadyVoted(@Request() req: Request & { user: VoterWithId }) {
+    const voted = await this.electionService.checkIfAlreadyVoted(
+      req.user._id.toString(),
+    )
+    return { voted }
+  }
+
   @Post('token')
   async getToken(@Body() voter: Voter) {
     return { token: await this.voteService.generateToken(voter) }

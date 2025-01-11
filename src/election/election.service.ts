@@ -446,6 +446,15 @@ export class ElectionService {
     return { message: 'Vote cast successfully', voterId, candidateId }
   }
 
+  async checkIfAlreadyVoted(voterId: string): Promise<boolean> {
+    const election = await this.getLatestElectionWithVotes()
+    if (!election) throw new NotFoundException('No elections found')
+    if (!isActive(election))
+      throw new NotFoundException('There is no active election')
+
+    return election.votes?.some((vote) => vote.voterId === voterId) || false
+  }
+
   private async createStartOrEndJob(
     election: ElectionWithId,
     newDate: Date,
