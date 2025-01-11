@@ -3,14 +3,14 @@ import { UsersService } from 'src/users/users.service'
 import { JwtService } from '@nestjs/jwt'
 import { LoginDTO, SignUpDTO } from './auth.dto'
 import { asPublicUser, PublicUser } from 'src/schemas/user.schema'
-import { SessionService } from 'src/session/session.service'
+// import { SessionService } from 'src/session/session.service'
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
-    private sessionService: SessionService,
+    // private sessionService: SessionService,
   ) {}
 
   async validateUser({ email, password }: LoginDTO) {
@@ -32,13 +32,13 @@ export class AuthService {
 
   async login(user: PublicUser) {
     const access_token = this.jwtService.sign(user)
-    await this.sessionService.createSession(user._id.toString(), access_token)
+    // await this.sessionService.createSession(user._id.toString(), access_token)
     return { access_token }
   }
 
-  async logout(user: PublicUser) {
-    const userId = user._id.toString()
-    await this.sessionService.deleteSessionsByUserId(userId)
-    return { message: 'Logged out' }
-  }
+  // async logout(user: PublicUser) {
+  // const userId = user._id.toString()
+  // await this.sessionService.deleteSessionsByUserId(userId)
+  // return { message: 'Logged out' }
+  // }
 }

@@ -3,14 +3,14 @@ import { PassportStrategy } from '@nestjs/passport'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 import { PublicUser } from 'src/schemas/user.schema'
 import { UsersService } from 'src/users/users.service'
-import { SessionService } from 'src/session/session.service'
+// import { SessionService } from 'src/session/session.service'
 import { Request } from 'express'
 
 @Injectable()
 export class JWTStrategy extends PassportStrategy(Strategy) {
   constructor(
     private usersService: UsersService,
-    private sessionService: SessionService,
+    // private sessionService: SessionService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -29,11 +29,13 @@ export class JWTStrategy extends PassportStrategy(Strategy) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { iat, exp, ...rest } = payload
     const user = await this.usersService.findUserById(rest._id)
-    const session = await this.sessionService.findSession(
-      rest._id.toString(),
-      accessToken,
-    )
-    if (!user || !session) return null
+    // const session = await this.sessionService.findSession(
+    //   rest._id.toString(),
+    //   accessToken,
+    // )
+    // if (!user || !session) return null
+
+    if (!user) return null
 
     return rest as PublicUser
   }
