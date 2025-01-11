@@ -17,7 +17,7 @@ import { UsersModule } from 'src/users/users.module'
       useFactory: (config: ConfigService) => ({
         senderDomain: process.env.SENDER_DOMAIN!,
         senderName: 'FUTA Election',
-        auth: config.getOrThrow<string>('ZEPTOMAIL_AUTH'),
+        auth: config.getOrThrow<string>('BREVO_API_KEY'),
       }),
     }),
     JwtModule.registerAsync({

@@ -21,16 +21,7 @@ export class ForgotPasswordService {
     if (!user) return
 
     const resetLink = this.generateResetLink(user)
-    await this.emailService.sendMail(
-      [{ address: email }],
-      'Reset your password',
-      `Hello,\n\n` +
-        `You requested to reset your password. ` +
-        `Please click the link below to reset your password.\n\n` +
-        `${resetLink}\n\n` +
-        `If you did not request this, please ignore this email.\n\n` +
-        `Thank you!`,
-    )
+    await this.emailService.sendMail(email, 3, { resetLink })
   }
 
   private generateResetLink(user: PublicUser) {

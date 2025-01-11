@@ -8,44 +8,35 @@ export class EmailService {
 
   constructor(@Inject(MODULE_OPTIONS_TOKEN) options: EmailModuleOptions) {
     if (!options.auth) {
-      throw new Error('ZEPTOMAIL_AUTH is required')
+      throw new Error('BREVO_API_KEY is required')
     }
     this.authorization = options.auth
   }
 
-  async sendMail(
-    to: { address: string; name?: string }[],
-    subject: string,
-    htmlbody: string,
-  ) {
-    const body = {
-      from: {
-        address: 'noreply@futaaec.com',
-        name: 'FUTA AEC',
-      },
-      to: to.map((recipient) => ({
-        email_address: {
-          address: recipient.address,
-          name: recipient.name,
-        },
-      })),
-      subject,
-      htmlbody,
-    }
-    return console.log(body.to[0], { ...body, to: undefined })
-
-    const res = await fetch('https://api.zeptomail.com/v1.1/email', {
+  async sendMail(to: string, templateId: number, params: object) {
+    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        Authorization: this.authorization,
-        Accept: 'application/json',
+        accept: 'application/json',
+        'api-key': this.authorization,
+        'content-type': 'application/json',
       },
-      body: JSON.stringify(body),
+      body: JSON.stringify({
+        params,
+        templateId,
+        to: [{ email: to }],
+      }),
     })
-    const data = await res.json()
-    console.log(data)
-    if (res.ok) return data
-    else throw new HttpException(data, res.status)
+    if (res.ok) return await res.json()
+    else {
+      try {
+        const error = await res.json()
+        console.error(error)
+        throw new HttpException(error, res.status)
+      } catch (e) {
+        console.error(e)
+        throw new HttpException('An error occurred', res.status)
+      }
+    }
   }
 }

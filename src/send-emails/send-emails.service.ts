@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  NotImplementedException,
   UnprocessableEntityException,
 } from '@nestjs/common'
 import { ElectionService } from 'src/election/election.service'
@@ -39,31 +40,33 @@ export class SendEmailsService {
   }
 
   async sendBulkReminderEmails() {
+    throw new NotImplementedException()
+
     const election = await this.electionService.getLatestElection()
     if (!election) throw new NotFoundException('No elections found')
     if (!isActive(election))
       throw new NotFoundException('There is no active election')
 
     // FIXME do not send emails to voters who have already voted
-    await Promise.all(
-      election.voterIds.map(async (voterId) => {
-        const voter = await this.voterService.getVoterById(voterId)
-        const token = await this.voteService.generateToken(voter)
+    // await Promise.all(
+    //   election.voterIds.map(async (voterId) => {
+    //     const voter = await this.voterService.getVoterById(voterId)
+    //     const token = await this.voteService.generateToken(voter)
 
-        const subject = 'Reminder to vote in the ongoing election'
+    //     const subject = 'Reminder to vote in the ongoing election'
 
-        await this.emailService.sendMail(
-          [{ address: voter.email }],
-          subject,
-          `Hello,\n\n` +
-            `The election is still ongoing. ` +
-            `Please click the link below to vote.\n\n` +
-            `${this.frontendUrl}/vote?token=${token}\n\n` +
-            `Election ends: ${this.formatDateTime(election.endDate)}\n\n` +
-            `Thank you for voting!`,
-        )
-      }),
-    )
+    // await this.emailService.sendMail(
+    //   [{ address: voter.email }],
+    //   subject,
+    //   `Hello,\n\n` +
+    //     `The election is still ongoing. ` +
+    //     `Please click the link below to vote.\n\n` +
+    //     `${this.frontendUrl}/vote?token=${token}\n\n` +
+    //     `Election ends: ${this.formatDateTime(election.endDate)}\n\n` +
+    //     `Thank you for voting!`,
+    // )
+    // }),
+    // )
   }
 
   async sendBulkPreElectionEmails(election: ElectionWithoutVotes) {
@@ -72,19 +75,11 @@ export class SendEmailsService {
         const voter = await this.voterService.getVoterById(voterId)
         const token = await this.voteService.generateToken(voter)
 
-        const subject = 'Vote in the upcoming election. Starts within an hour'
-
-        await this.emailService.sendMail(
-          [{ address: voter.email }],
-          subject,
-          `Hello,\n\n` +
-            `The election will start within an hour. ` +
-            `Please click the link below to vote.\n\n` +
-            `${this.frontendUrl}/vote?token=${token}\n\n` +
-            `Election starts: ${this.formatDateTime(election.startDate)}\n` +
-            `Election ends: ${this.formatDateTime(election.endDate)}\n\n` +
-            `Thank you for voting!`,
-        )
+        await this.emailService.sendMail(voter.email, 1, {
+          link: `${this.frontendUrl}/vote?token=${token}`,
+          startDate: `${this.formatDateTime(election.startDate)}`,
+          endDate: `${this.formatDateTime(election.endDate)}`,
+        })
       }),
     )
   }
@@ -93,16 +88,10 @@ export class SendEmailsService {
     await Promise.all(
       election.voterIds.map(async (voterId) => {
         const voter = await this.voterService.getVoterById(voterId)
-        const subject = 'Election has ended. View the results'
 
-        await this.emailService.sendMail(
-          [{ address: voter.email }],
-          subject,
-          `Hello,\n\n` +
-            `The election has ended. Results will be communicated soon.\n\n` +
-            `Election ended: ${this.formatDateTime(election.endDate)}\n\n` +
-            `Thank you for voting!`,
-        )
+        await this.emailService.sendMail(voter.email, 2, {
+          endDate: this.formatDateTime(election.endDate),
+        })
       }),
     )
   }
