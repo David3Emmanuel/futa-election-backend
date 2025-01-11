@@ -9,3 +9,12 @@ export class VoteDTO {
   @IsNotEmpty()
   candidateId: string
 }
+
+export class VotesDTO {
+  @ApiProperty({
+    description: 'Candidate IDs',
+  })
+  @IsString({ each: true })
+  @IsNotEmpty()
+  candidateIds: string[]
+}

@@ -99,9 +99,7 @@ export class SendEmailsService {
           [{ address: voter.email }],
           subject,
           `Hello,\n\n` +
-            `The election has ended. ` +
-            `Please click the link below to view the results.\n\n` +
-            `${this.frontendUrl}/dashboard/election/summary\n\n` +
+            `The election has ended. Results will be communicated soon.\n\n` +
             `Election ended: ${this.formatDateTime(election.endDate)}\n\n` +
             `Thank you for voting!`,
         )
