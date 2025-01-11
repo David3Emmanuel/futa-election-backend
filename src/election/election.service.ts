@@ -302,6 +302,13 @@ export class ElectionService {
     return { message: 'Candidates or voters deleted successfully' }
   }
 
+  async deleteLatestElection(): Promise<{ message: string }> {
+    const latest = await this.getLatestElectionWithVotes()
+    if (!latest) throw new NotFoundException('No elections found')
+    await this.model.findByIdAndDelete(latest._id)
+    return { message: 'Latest election deleted successfully' }
+  }
+
   private async generateElectionSummary(
     election: ElectionWithId,
   ): Promise<ElectionSummary> {

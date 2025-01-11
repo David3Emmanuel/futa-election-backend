@@ -6,6 +6,7 @@ import {
   Patch,
   UseGuards,
   Body,
+  Delete,
 } from '@nestjs/common'
 import { ElectionService } from './election.service'
 import {
@@ -246,5 +247,21 @@ export class ElectionController {
     @Body() updateElectionDTO: UpdateElectionDTO,
   ) {
     return this.electionService.updateElectionByYear(year, updateElectionDTO)
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  @Delete('latest')
+  @ApiOkResponse({
+    description: 'Delete the latest election',
+  })
+  @ApiNotFoundResponse({
+    description: 'No elections found',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Unauthorized',
+  })
+  async deleteLatestElection() {
+    return this.electionService.deleteLatestElection()
   }
 }
