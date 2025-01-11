@@ -44,11 +44,22 @@ export class VoteController {
     @Request() req: Request & { user: VoterWithId },
   ) {
     console.log(req.user, voteDto)
-    return await Promise.all(
-      voteDto.candidateIds.map((candidateId) =>
-        this.electionService.castVote(req.user._id.toString(), candidateId),
-      ),
-    )
+    const results: {
+      message: string
+      voterId: string
+      candidateId: string
+    }[] = []
+    for (const candidateId of voteDto.candidateIds) {
+      console.log(`${req.user._id.toString()} voting for ${candidateId}`)
+      const res = await this.electionService.castVote(
+        req.user._id.toString(),
+        candidateId,
+        true,
+      )
+      results.push(res)
+    }
+
+    return results
   }
 
   @Post('token')

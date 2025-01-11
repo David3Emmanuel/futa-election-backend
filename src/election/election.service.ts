@@ -390,7 +390,7 @@ export class ElectionService {
     }
   }
 
-  async castVote(voterId: string, candidateId: string) {
+  async castVote(voterId: string, candidateId: string, forceReturn = false) {
     const election = await this.getLatestElectionWithVotes()
     if (!election) throw new NotFoundException('No elections found')
     if (!isActive(election))
@@ -401,8 +401,15 @@ export class ElectionService {
       throw new UnauthorizedException('Cannot participate in this election')
 
     // Confirm that candidate belongs this election
-    if (!election.candidateIds.includes(candidateId))
-      throw new NotFoundException('Candidate not found in this election')
+    if (!election.candidateIds.includes(candidateId)) {
+      if (forceReturn)
+        return {
+          message: 'Candidate not found in this election',
+          voterId,
+          candidateId,
+        }
+      else throw new NotFoundException('Candidate not found in this election')
+    }
 
     // Confirm that voter has not voted for this position before
     const candidate = await this.candidateService.getCandidateById(candidateId)
@@ -416,9 +423,16 @@ export class ElectionService {
           if (
             alreadyVotedCandidate.currentPosition === candidate.currentPosition
           ) {
-            throw new ConflictException(
-              'You have already voted for this position',
-            )
+            if (forceReturn)
+              return {
+                message: 'You have already voted for this position',
+                voterId,
+                candidateId,
+              }
+            else
+              throw new ConflictException(
+                'You have already voted for this position',
+              )
           }
         }
       }
