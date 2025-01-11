@@ -492,6 +492,8 @@ export class ElectionService {
       end: 'Skipped',
     }
 
+    return jobStatus
+
     if (
       forceCreate ||
       election.startDate.getTime() !== newDates.start.getTime()
