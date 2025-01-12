@@ -30,15 +30,18 @@ export class SessionService {
   }
 
   private async canCreateWithinLimits(userId: string) {
+    await this.waitForStart()
+
     const count = await this.model.countDocuments({ userId }).exec()
     if (count >= this.maxSessions) await this.removeStaleSessions(userId)
     else return true
-
     const recount = await this.model.countDocuments({ userId }).exec()
     return recount < this.maxSessions
   }
 
   private async removeStaleSessions(userId: string) {
+    await this.waitForStart()
+
     const sessions = (await this.model.find({ userId }).exec()).map(
       extractSession,
     )
@@ -53,22 +56,22 @@ export class SessionService {
         }
       })
       .map((session) => session._id)
-
     if (toDelete.length > 0)
       await this.model.deleteMany({ _id: { $in: toDelete } }).exec()
   }
 
   async createSession(userId: string, accessToken: string) {
     await this.waitForStart()
+
     if (!(await this.canCreateWithinLimits(userId)))
       throw new ForbiddenException()
-
     const created = await new this.model({ userId, accessToken }).save()
     return extractSession(created)
   }
 
   async findSession(userId: string, accessToken: string) {
     await this.waitForStart()
+
     const session = await this.model.findOne({ userId, accessToken }).exec()
     return session && extractSession(session)
   }
@@ -76,5 +79,14 @@ export class SessionService {
   async deleteSessionsByUserId(userId: string) {
     await this.waitForStart()
     await this.model.deleteMany({ userId }).exec()
+  }
+
+  async deleteSession(userId: string, accessToken: string) {
+    await this.waitForStart()
+    console.log('Logging', userId, 'out of', accessToken)
+    try {
+      console.log(await this.model.deleteMany({ userId, accessToken }).exec())
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (e) {}
   }
 }

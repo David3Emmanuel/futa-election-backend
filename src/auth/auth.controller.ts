@@ -11,7 +11,8 @@ import { AuthService } from './auth.service'
 import { LocalAuthGuard } from './local-auth.guard'
 import { LoginDTO, SignUpDTO } from './auth.dto'
 import { PublicUser } from 'src/schemas/user.schema'
-import { ApiBody } from '@nestjs/swagger'
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger'
+import { JWTAuthGuard } from './jwt-auth.guard'
 // import { JWTAuthGuard } from './jwt-auth.guard'
 
 @Controller('auth')
@@ -32,10 +33,12 @@ export class AuthController {
     return { message: 'Success' }
   }
 
-  // @Post('logout')
-  // @ApiBearerAuth()
-  // @UseGuards(JWTAuthGuard)
-  // async logout(@Request() req: Request & { user: PublicUser }) {
-  //   return this.authService.logout(req.user)
-  // }
+  @Post('logout')
+  @ApiBearerAuth()
+  @UseGuards(JWTAuthGuard)
+  async logout(
+    @Request() req: Request & { user: PublicUser & { accessToken: string } },
+  ) {
+    return this.authService.logout(req.user)
+  }
 }
