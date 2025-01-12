@@ -21,7 +21,6 @@ export class JWTVoteStrategy extends PassportStrategy(Strategy, 'jwt-vote') {
   async validate(
     payload: Voter & { electionId: string; iat: number; exp: number },
   ): Promise<VoterWithId | null> {
-    console.log(payload)
     const { email, electionId } = payload
 
     if (!email) {

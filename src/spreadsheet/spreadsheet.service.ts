@@ -22,10 +22,7 @@ export class SpreadsheetService {
   }
 
   processSpreadsheet(sheet: xlsx.WorkSheet) {
-    console.log(sheet)
     convertHeaderToCamelCase(sheet)
-    console.log(sheet)
-
     const data = xlsx.utils.sheet_to_json(sheet)
     return data
   }

@@ -415,11 +415,9 @@ export class ElectionService {
     const candidate = await this.candidateService.getCandidateById(candidateId)
     if (election.votes) {
       for (const vote of election.votes) {
-        console.log('Checking', vote)
         if (vote.voterId === voterId) {
           const alreadyVotedCandidate =
             await this.candidateService.getCandidateById(vote.candidateId)
-          console.log('Already voted for', alreadyVotedCandidate.name)
           if (
             alreadyVotedCandidate.currentPosition === candidate.currentPosition
           ) {
@@ -468,7 +466,7 @@ export class ElectionService {
         await this.cronService.deleteJob(previousJobId)
       } catch (e) {
         if (e instanceof HttpException)
-          console.log(`Failed to delete job ${previousJobId}`)
+          console.warn(`Failed to delete job ${previousJobId}`)
         else throw e
       }
     }

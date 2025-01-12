@@ -83,10 +83,6 @@ export class SessionService {
 
   async deleteSession(userId: string, accessToken: string) {
     await this.waitForStart()
-    console.log('Logging', userId, 'out of', accessToken)
-    try {
-      console.log(await this.model.deleteMany({ userId, accessToken }).exec())
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {}
+    await this.model.deleteMany({ userId, accessToken }).exec()
   }
 }
