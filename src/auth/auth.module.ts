@@ -20,7 +20,7 @@ import { SessionModule } from 'src/session/session.module'
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
         secret: config.getOrThrow<string>('JWT_SECRET_KEY'),
-        signOptions: { expiresIn: '5m' },
+        signOptions: { expiresIn: '2h' },
       }),
     }),
     SessionModule,
