@@ -3,14 +3,13 @@ import { ForgotPasswordService } from './forgot-password.service'
 import { ApiBearerAuth, ApiProperty } from '@nestjs/swagger'
 import { JWTResetGuard } from './jwt-reset.guard'
 import { PublicUser } from 'src/schemas/user.schema'
-import { IsEmail, IsNotEmpty } from 'class-validator'
+import { IsNotEmpty } from 'class-validator'
 
 class ForgotPasswordRequest {
   @ApiProperty() email: string
 }
 
 export class ResetPasswordRequest {
-  @ApiProperty() @IsEmail() email: string
   @ApiProperty() @IsNotEmpty() password: string
 }
 

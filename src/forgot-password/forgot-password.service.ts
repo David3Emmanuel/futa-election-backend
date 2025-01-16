@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common'
+import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
 import { EmailService } from 'src/email/email.service'
@@ -30,11 +30,7 @@ export class ForgotPasswordService {
     return `${frontendUrl}/reset-password?token=${token}`
   }
 
-  async resetPassword(
-    user: PublicUser,
-    { email, password }: ResetPasswordRequest,
-  ) {
-    if (user.email !== email) throw new ForbiddenException()
+  async resetPassword(user: PublicUser, { password }: ResetPasswordRequest) {
     await this.usersService.updatePassword(user, password)
   }
 }
