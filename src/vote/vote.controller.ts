@@ -1,7 +1,7 @@
 import { Body, Controller, Get, Post, Request, UseGuards } from '@nestjs/common'
 import { ApiBearerAuth, ApiOperation } from '@nestjs/swagger'
 import { JWTVoteGuard } from './jwt-vote.guard'
-import { Voter, VoterWithId } from 'src/schemas/voter.schema'
+import { VoterWithId } from 'src/schemas/voter.schema'
 import { VoteDTO, VotesDTO } from './vote.dto'
 import { VoteService } from './vote.service'
 import { ElectionService } from 'src/election/election.service'
@@ -69,10 +69,5 @@ export class VoteController {
       req.user._id.toString(),
     )
     return { voted }
-  }
-
-  @Post('token')
-  async getToken(@Body() voter: Voter) {
-    return { token: await this.voteService.generateToken(voter) }
   }
 }

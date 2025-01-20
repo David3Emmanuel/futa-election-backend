@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common'
 
 @Controller()
-export class TestController {
+export class HealthCheckController {
   @Get()
   getMessage() {
     return 'FUTA AEC API is live'
